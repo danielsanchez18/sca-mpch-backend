@@ -12,6 +12,9 @@ public class Supervisor {
     @Column(name = "id_supervisor", nullable = false, unique = true, length = 11)
     private String idSupervisor;
 
+    @Column(name = "password", nullable = false)
+    private String password;
+
     @OneToOne
     @JoinColumn(name = "id_user", referencedColumnName = "id_user", nullable = false)
     private User user;
@@ -22,8 +25,9 @@ public class Supervisor {
 
     public Supervisor() { }
 
-    public Supervisor(String idSupervisor, User user, Area area) {
+    public Supervisor(String idSupervisor, String password, User user, Area area) {
         this.idSupervisor = idSupervisor;
+        this.password = password;
         this.user = user;
         this.area = area;
     }
@@ -34,6 +38,14 @@ public class Supervisor {
 
     public void setIdSupervisor(String idSupervisor) {
         this.idSupervisor = idSupervisor;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public User getUser() {

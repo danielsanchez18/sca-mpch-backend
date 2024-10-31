@@ -13,7 +13,9 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/role")
-@CrossOrigin("*")
+//@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:4200")
+
 public class RoleController {
 
     @Autowired

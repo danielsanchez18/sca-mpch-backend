@@ -10,12 +10,13 @@ import java.util.UUID;
 public class Assistance {
 
     @Id
-    @Column(name = "id_assistance", nullable = false, unique = true, length = 11)
-    private String idAssistance;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id_assistance", nullable = false)
+    private UUID idAssistance;
 
     @ManyToOne
-    @JoinColumn(name = "id_user", referencedColumnName = "id_user", nullable = false)
-    private User user;
+    @JoinColumn(name = "id_intern", referencedColumnName = "id_intern", nullable = false)
+    private Intern intern;
 
     @Column(name = "check_in")
     private LocalDate checkIn;
@@ -28,28 +29,28 @@ public class Assistance {
 
     public Assistance() { }
 
-    public Assistance(String idAssistance, User user, LocalDate checkIn, LocalDate checkOut, double hoursWorked) {
+    public Assistance(UUID idAssistance, Intern intern, LocalDate checkIn, LocalDate checkOut, double hoursWorked) {
         this.idAssistance = idAssistance;
-        this.user = user;
+        this.intern = intern;
         this.checkIn = checkIn;
         this.checkOut = checkOut;
         this.hoursWorked = hoursWorked;
     }
 
-    public String getIdAssistance() {
+    public UUID getIdAssistance() {
         return idAssistance;
     }
 
-    public void setIdAssistance(String idAssistance) {
+    public void setIdAssistance(UUID idAssistance) {
         this.idAssistance = idAssistance;
     }
 
-    public User getUser() {
-        return user;
+    public Intern getIntern() {
+        return intern;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setIntern(Intern intern) {
+        this.intern = intern;
     }
 
     public LocalDate getCheckIn() {

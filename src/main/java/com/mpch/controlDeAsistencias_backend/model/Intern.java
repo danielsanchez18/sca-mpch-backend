@@ -76,4 +76,5 @@ public class Intern {
     public void setTotalHours(Long totalHours) {
         this.totalHours = totalHours;
     }
+
 }

@@ -14,17 +14,17 @@ public class Certificated {
     private UUID idCertificated;
 
     @OneToOne
-    @JoinColumn(name = "id_user", referencedColumnName = "id_user", nullable = false)
-    private User user;
+    @JoinColumn(name = "id_intern", referencedColumnName = "id_intern", nullable = false)
+    private Intern intern;
 
     @Column(name = "status", nullable = false)
     private boolean status;
 
     public Certificated() { }
 
-    public Certificated(UUID idCertificated, User user, boolean status) {
+    public Certificated(UUID idCertificated, Intern intern, boolean status) {
         this.idCertificated = idCertificated;
-        this.user = user;
+        this.intern = intern;
         this.status = status;
     }
 
@@ -36,12 +36,12 @@ public class Certificated {
         this.idCertificated = idCertificated;
     }
 
-    public User getUser() {
-        return user;
+    public Intern getIntern() {
+        return intern;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setIntern(Intern intern) {
+        this.intern = intern;
     }
 
     public boolean isStatus() {

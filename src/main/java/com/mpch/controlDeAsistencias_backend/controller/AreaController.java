@@ -13,7 +13,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/area")
-@CrossOrigin("*")
+//@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:4200")
 public class AreaController {
 
     @Autowired
