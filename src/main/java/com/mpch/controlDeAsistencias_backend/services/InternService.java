@@ -15,16 +15,18 @@ public interface InternService {
 
     Page<Intern> findAllInterns(Pageable pageable);
 
-    List<Intern> searchInternsByName(String name, int page, int size);
+    Page<Intern> searchInternsByName(String name, Pageable pageable);
 
-    List<Intern> findInternsByArea(String area, int page, int size);
+    Page<Intern> findInternsByArea(String area, Pageable pageable);
 
-    List<Intern> findInternsByUniversity(String university, int page, int size);
+    Page<Intern> findInternsByUniversity(String university, Pageable pageable);
+
+    Page<Intern> findInternsByAreaUniversity(UUID idAreaUniversity, Pageable pageable);
 
     Long getTotalInterns();
 
     Intern updateIntern(String idIntern, Intern intern);
 
-    void deleteIntern(UUID idUser);
+    void deleteIntern(String idIntern);
 
 }

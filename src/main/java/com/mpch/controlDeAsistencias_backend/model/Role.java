@@ -2,32 +2,30 @@ package com.mpch.controlDeAsistencias_backend.model;
 
 import jakarta.persistence.*;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "role")
 public class Role {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_role")
-    private UUID idRole;
+    private Long idRole;
 
     @Column(name = "name", nullable = false, length = 20)
     private String name;
 
     public Role() { }
 
-    public Role(UUID idRole, String name) {
+    public Role(Long idRole, String name) {
         this.idRole = idRole;
         this.name = name;
     }
 
-    public UUID getIdRole() {
+    public Long getIdRole() {
         return idRole;
     }
 
-    public void setIdRole(UUID idRole) {
+    public void setIdRole(Long idRole) {
         this.idRole = idRole;
     }
 

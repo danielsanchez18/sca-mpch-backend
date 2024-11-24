@@ -4,9 +4,6 @@ import com.mpch.controlDeAsistencias_backend.model.Supervisor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-import java.util.UUID;
-
 public interface SupervisorService {
 
     Supervisor saveSupervisor(Supervisor supervisor);
@@ -15,13 +12,15 @@ public interface SupervisorService {
 
     Page<Supervisor> getAllSupervisors(Pageable pageable);
 
-    List<Supervisor> searchSupervisorsByName(String name, int page, int size);
+    Page<Supervisor> searchSupervisorsByName(String name, Pageable pageable);
 
-    List<Supervisor> getSupervisorsByArea(String area, int page, int size);
+    Page<Supervisor> getSupervisorsByDni(String area, Pageable pageable);
 
-    Long countSupervisors();
+    Page<Supervisor> getSupervisorsByArea(String area, Pageable pageable);
+
+    Long getTotalSupervisors();
 
     Supervisor updateSupervisor(String idSupervisor, Supervisor supervisor);
 
-    void deleteSupervisor(UUID idUser);
+    void deleteSupervisor(String idSupervisor);
 }

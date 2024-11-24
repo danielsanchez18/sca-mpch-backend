@@ -8,8 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -18,28 +19,28 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
-    private void validateUser(UUID idUser, User user) {
-
-        userRepository.findByDni(user.getDni()).ifPresent(existingUser -> {
-            if (idUser == null || !existingUser.getIdUser().equals(idUser)) {
-                throw new RuntimeException("Ya existe un usuario con el mismo DNI");
-            }
-        });
-
-        if (user.getAge() <= 18) {
-            throw new RuntimeException("El usuario debe ser mayor de 18 años");
+    // Validar unicidad de DNI
+    private void validateUniqueDni(String dni) {
+        if (userRepository.existsByDni(dni)) {
+            throw new RuntimeException("Ya existe un usuario con el DNI '" + dni + "'");
         }
+    }
 
+    // Validar que el usuario sea mayor de edad
+    private void validateAge(Date birthdate) {
+        LocalDate today = LocalDate.now();
+        LocalDate birth = birthdate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        if (Period.between(birth, today).getYears() < 18) {
+            throw new RuntimeException("El usuario debe ser mayor de 18 años para registrarse.");
+        }
     }
 
     @Override
     public User save(User user) {
-        validateUser(user.getIdUser(), user);
-
-        Date currentDate = new Date();
-        user.setCreatedAt(currentDate);
-        user.setUpdatedAt(currentDate);
-
+        validateUniqueDni(user.getDni());
+        validateAge(user.getBirthdate());
+        user.setCreatedAt(LocalDate.now().atStartOfDay());
+        user.setUpdatedAt(LocalDate.now().atStartOfDay());
         return userRepository.save(user);
     }
 
@@ -56,28 +57,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findUsersByRole(String role, int page, int size) {
-        return userRepository.findByRole(role, page, size);
+    public Page<User> searchUsersByName(String name, Pageable pageable) {
+        return userRepository.findByFullNameContainingIgnoreCase(name, pageable);
     }
 
     @Override
-    public List<User> searchUsersByName(String name, int page, int size) {
-        return userRepository.searchByName(name, page, size);
+    public Page<User> findUsersByRole(Long idRole, Pageable pageable) {
+        return userRepository.findByRole_IdRole(idRole, pageable);
     }
 
     @Override
-    public List<User> searchUsersByDni(String dni, int page, int size) {
-        return userRepository.searchByDni(dni, page, size);
+    public Page<User> searchUsersByDni(String dni, Pageable pageable) {
+        return userRepository.findByDniContainingIgnoreCase(dni, pageable);
     }
 
     @Override
-    public List<User> findUsersEnabled(int page, int size) {
-        return userRepository.findEnabled(page, size);
-    }
-
-    @Override
-    public List<User> findUsersDisabled(int page, int size) {
-        return userRepository.findDisabled(page, size);
+    public Page<User> findUsersByStatus(boolean status, Pageable pageable) {
+        return userRepository.findByStatus(status, pageable);
     }
 
     @Override
@@ -87,23 +83,31 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User updateUser(UUID idUser, User user) {
-        User existingUser = findUserById(idUser);
-        validateUser(idUser, user);
+        User existingUser = userRepository.findById(idUser).orElseThrow(
+                () -> new RuntimeException("Usuario no encontrado")
+        );
+
+        if (!existingUser.getDni().equals(user.getDni())) {
+            validateUniqueDni(user.getDni());
+        }
+        validateAge(user.getBirthdate());
 
         existingUser.setName(user.getName());
         existingUser.setLastname(user.getLastname());
         existingUser.setDni(user.getDni());
-        existingUser.setAge(user.getAge());
+        existingUser.setBirthdate(user.getBirthdate());
         existingUser.setPhoto(user.getPhoto());
         existingUser.setStatus(user.isStatus());
-
-        existingUser.setUpdatedAt(new Date());
+        existingUser.setUpdatedAt(LocalDate.now().atStartOfDay());
 
         return userRepository.save(existingUser);
     }
 
     @Override
     public void deleteUser(UUID idUser) {
+        if (!userRepository.existsById(idUser)) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
         userRepository.deleteById(idUser);
     }
 }

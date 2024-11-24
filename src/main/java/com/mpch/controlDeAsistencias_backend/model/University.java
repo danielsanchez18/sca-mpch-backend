@@ -2,16 +2,14 @@ package com.mpch.controlDeAsistencias_backend.model;
 
 import jakarta.persistence.*;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "university")
 public class University {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_university")
-    private UUID idUniversity;
+    private Long idUniversity;
 
     @Column(name = "name", unique = true, nullable = false, length = 100)
     private String name;
@@ -27,7 +25,7 @@ public class University {
 
     public University() { }
 
-    public University(UUID idUniversity, String name, String acronym, String photo, boolean status) {
+    public University(Long idUniversity, String name, String acronym, String photo, boolean status) {
         this.idUniversity = idUniversity;
         this.name = name;
         this.acronym = acronym;
@@ -35,11 +33,11 @@ public class University {
         this.status = status;
     }
 
-    public UUID getIdUniversity() {
+    public Long getIdUniversity() {
         return idUniversity;
     }
 
-    public void setIdUniversity(UUID idUniversity) {
+    public void setIdUniversity(Long idUniversity) {
         this.idUniversity = idUniversity;
     }
 

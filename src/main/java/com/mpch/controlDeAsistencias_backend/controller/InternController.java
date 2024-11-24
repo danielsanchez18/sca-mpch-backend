@@ -6,48 +6,94 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/intern")
-//@CrossOrigin("*")
-@CrossOrigin(origins = "http://localhost:4200")
 public class InternController {
 
     @Autowired
     private InternService internService;
 
-    @PostMapping("/save")
-    public Intern saveIntern(@RequestBody Intern intern) {
-        return internService.saveIntern(intern);
-    }
-
-    @GetMapping("/all")
-    public Page<Intern> getAllInterns(@PageableDefault(page = 0, size = 10) Pageable pageable) {
-        return internService.findAllInterns(pageable);
+    @PostMapping("/add")
+    public ResponseEntity<?> addIntern(@RequestBody Intern intern) {
+        try {
+            Intern createdIntern = internService.saveIntern(intern);
+            return ResponseEntity.status(HttpStatus.CREATED).
+                    body(successResponse("Practicante creado exitosamente", createdIntern));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).
+                    body(errorResponse(ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
+                    body(errorResponse("Error al crear el practicante"));
+        }
     }
 
     @GetMapping("/id/{idIntern}")
-    public Intern getInternById(@PathVariable String idIntern) {
-        return internService.findInternById(idIntern);
+    public ResponseEntity<?> getInternById(@PathVariable String idIntern) {
+        try {
+            Intern intern = internService.findInternById(idIntern);
+            return ResponseEntity.ok(successResponse("Practicante encontrado", intern));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse(ex.getMessage()));
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getAllInterns(@PageableDefault(size = 10, page = 0) Pageable pageable) {
+        try {
+            Page<Intern> interns = internService.findAllInterns(pageable);
+            return ResponseEntity.ok(successResponse("Lista de practicantes obtenida exitosamente", interns));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al obtener la lista de practicantes"));
+        }
     }
 
     @GetMapping("/name/{name}")
-    public List<Intern> searchInternsByName(@PathVariable String name, @PageableDefault(page = 1, size = 10) Pageable pageable) {
-        return internService.searchInternsByName(name, pageable.getPageNumber(), pageable.getPageSize());
+    public ResponseEntity<?> searchInternsByName(@PathVariable String name, @PageableDefault(size = 10, page = 0) Pageable pageable) {
+        try {
+            Page<Intern> interns = internService.searchInternsByName(name, pageable);
+            return ResponseEntity.ok(successResponse("Practicantes encontrados", interns));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar practicantes"));
+        }
     }
 
     @GetMapping("/area/{area}")
-    public List<Intern> findInternsByArea(@PathVariable String area, @PageableDefault(page = 1, size = 10) Pageable pageable) {
-        return internService.findInternsByArea(area, pageable.getPageNumber(), pageable.getPageSize());
+    public ResponseEntity<?> findInternsByArea(@PathVariable String area, @PageableDefault(size = 10, page = 0) Pageable pageable) {
+        try {
+            Page<Intern> interns = internService.findInternsByArea(area, pageable);
+            return ResponseEntity.ok(successResponse("Practicantes encontrados", interns));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar practicantes"));
+        }
     }
 
     @GetMapping("/university/{university}")
-    public List<Intern> findInternsByUniversity(@PathVariable String university, @PageableDefault(page = 1, size = 10) Pageable pageable) {
-        return internService.findInternsByUniversity(university, pageable.getPageNumber(), pageable.getPageSize());
+    public ResponseEntity<?> findInternsByUniversity(@PathVariable String university, @PageableDefault(size = 10, page = 0) Pageable pageable) {
+        try {
+            Page<Intern> interns = internService.findInternsByUniversity(university, pageable);
+            return ResponseEntity.ok(successResponse("Practicantes encontrados", interns));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar practicantes"));
+        }
+    }
+
+    @GetMapping("/area-university/{idAreaUniversity}")
+    public ResponseEntity<?> findInternsByAreaUniversity(@PathVariable UUID idAreaUniversity, @PageableDefault(size = 10, page = 0) Pageable pageable) {
+        try {
+            Page<Intern> interns = internService.findInternsByAreaUniversity(idAreaUniversity, pageable);
+            return ResponseEntity.ok(successResponse("Practicantes encontrados", interns));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar practicantes"));
+        }
     }
 
     @GetMapping("/total")
@@ -56,13 +102,35 @@ public class InternController {
     }
 
     @PutMapping("/update/{idIntern}")
-    public Intern updateIntern(@PathVariable String idIntern, @RequestBody Intern intern) {
-        return internService.updateIntern(idIntern, intern);
+    public ResponseEntity<?> updateIntern(@PathVariable String idIntern, @RequestBody Intern intern) {
+        try {
+            Intern updatedIntern = internService.updateIntern(idIntern, intern);
+            return ResponseEntity.ok(successResponse("Practicante actualizado exitosamente", updatedIntern));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse(ex.getMessage()));
+        }
     }
 
     @DeleteMapping("/delete/{idIntern}")
-    public void deleteIntern(@PathVariable UUID idIntern) {
-        internService.deleteIntern(idIntern);
+    public ResponseEntity<?> deleteIntern(@PathVariable String idIntern) {
+        try {
+            internService.deleteIntern(idIntern);
+            return ResponseEntity.ok(successResponse("Practicante eliminado exitosamente", null));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse(ex.getMessage()));
+        }
     }
 
+    private Map<String, Object> successResponse(String message, Object data) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", message);
+        response.put("data", data);
+        return response;
+    }
+
+    private Map<String, String> errorResponse(String message) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", message);
+        return response;
+    }
 }

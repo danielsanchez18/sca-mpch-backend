@@ -6,52 +6,111 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
-@CrossOrigin("*")
 public class AdminController {
 
     @Autowired
     private AdminService adminService;
 
-    @PostMapping("/save")
-    public Admin saveAdmin(@RequestBody Admin admin){
-        return adminService.saveAdmin(admin);
+    @PostMapping("/add")
+    public ResponseEntity<?> addAdmin(@RequestBody Admin admin) {
+        try {
+            Admin createdAdmin = adminService.saveAdmin(admin);
+            return ResponseEntity.status(HttpStatus.CREATED).
+                    body(successResponse("Administrador creado exitosamente", createdAdmin));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).
+                    body(errorResponse(ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
+                    body(errorResponse("Error al crear el área"));
+        }
     }
 
     @GetMapping("/id/{idAdmin}")
-    public Admin getAdminById(@PathVariable String idAdmin){
-        return adminService.getAdminById(idAdmin);
+    public ResponseEntity<?> getAdminById(@PathVariable String idAdmin) {
+        try {
+            Admin admin = adminService.getAdminById(idAdmin);
+            return ResponseEntity.ok(successResponse("Administrador encontrado", admin));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse(ex.getMessage()));
+        }
     }
 
-    @GetMapping("/all")
-    public Page<Admin> getAllAdmins(@PageableDefault(page = 0, size = 10) Pageable pageable){
-        return adminService.getAllAdmins(pageable);
+    @GetMapping
+    public ResponseEntity<?> getAllAdmins(@PageableDefault(size = 10, page = 0) Pageable pageable) {
+        try {
+            Page<Admin> admins = adminService.getAllAdmins(pageable);
+            return ResponseEntity.ok(successResponse("Lista de administradores obtenida exitosamente", admins));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al obtener la lista de administradores"));
+        }
     }
 
     @GetMapping("/name/{name}")
-    public List<Admin> searchAdminsByName(@PathVariable String name, @PageableDefault(page = 1, size = 10) Pageable pageable){
-        return adminService.searchAdminsByName(name, pageable.getPageNumber(), pageable.getPageSize());
+    public ResponseEntity<?> searchAdminsByName(@PathVariable String name, @PageableDefault(size = 10, page = 0) Pageable pageable) {
+        try {
+            Page<Admin> admins = adminService.searchAdminsByName(name, pageable);
+            return ResponseEntity.ok(successResponse("Administradores encontrados", admins));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar los administradores"));
+        }
+    }
+
+    @GetMapping("/dni/{dni}")
+    public ResponseEntity<?> searchAdminsByDni(@PathVariable String dni, @PageableDefault(size = 10, page = 0) Pageable pageable) {
+        try {
+            Page<Admin> admins = adminService.searchAdminsByDni(dni, pageable);
+            return ResponseEntity.ok(successResponse("Administradores encontrados", admins));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar los administradores"));
+        }
     }
 
     @GetMapping("/total")
-    public Long getTotalAdmins(){
+    public Long getTotalAdmins() {
         return adminService.getTotalAdmins();
     }
 
     @PutMapping("/update/{idAdmin}")
-    public Admin updateAdmin(@PathVariable String idAdmin, @RequestBody Admin admin){
-        return adminService.updateAdmin(idAdmin, admin);
+    public ResponseEntity<?> updateAdmin(@PathVariable String idAdmin, @RequestBody Admin admin) {
+        try {
+            Admin updatedAdmin = adminService.updateAdmin(idAdmin, admin);
+            return ResponseEntity.ok(successResponse("Administrador actualizado exitosamente", updatedAdmin));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse(ex.getMessage()));
+        }
     }
 
-    @DeleteMapping("/delete/{idUser}")
-    public void deleteAdmin(@PathVariable UUID idUser){
-        adminService.deleteAdmin(idUser);
+    @DeleteMapping("/delete/{idAdmin}")
+    public ResponseEntity<?> deleteAdmin(@PathVariable String idAdmin) {
+        try {
+            adminService.deleteAdmin(idAdmin);
+            return ResponseEntity.ok(successResponse("Administrador eliminado exitosamente", null));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse(ex.getMessage()));
+        }
+    }
+
+    private Map<String, Object> successResponse(String message, Object data) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", message);
+        response.put("data", data);
+        return response;
+    }
+
+    private Map<String, String> errorResponse(String message) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", message);
+        return response;
     }
 
 }

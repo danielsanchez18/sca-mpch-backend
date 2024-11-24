@@ -15,13 +15,21 @@ public class Supervisor {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "id_user", referencedColumnName = "id_user", nullable = false)
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "id_area", referencedColumnName = "id_area", nullable = false)
     private Area area;
+
+    @PrePersist
+    private void generateId() {
+        if (this.idSupervisor == null || this.idSupervisor.isEmpty()) {
+            long timestamp = System.currentTimeMillis() % 1000000;
+            this.idSupervisor = "S24" + String.format("%07d", timestamp);
+        }
+    }
 
     public Supervisor() { }
 

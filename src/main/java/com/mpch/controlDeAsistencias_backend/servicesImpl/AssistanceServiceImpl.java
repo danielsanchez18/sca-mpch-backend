@@ -6,12 +6,13 @@ import com.mpch.controlDeAsistencias_backend.repository.AssistanceRepository;
 import com.mpch.controlDeAsistencias_backend.repository.InternRepository;
 import com.mpch.controlDeAsistencias_backend.services.AssistanceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.time.LocalTime;
 
 @Service
 public class AssistanceServiceImpl implements AssistanceService {
@@ -22,82 +23,97 @@ public class AssistanceServiceImpl implements AssistanceService {
     @Autowired
     private InternRepository internRepository;
 
+    private void updateTotalHours(Intern intern) {
+        // Sumar todas las horas trabajadas desde las asistencias
+        double totalHours = assistanceRepository.getTotalHoursWorkedByIntern(intern.getIdIntern());
+        intern.setTotalHours(totalHours);
+        internRepository.save(intern);
+    }
+
     @Override
     public Assistance registerCheckIn(String dni) {
-//        Intern intern = internRepository.findByDni(dni)
-//                .orElseThrow(() -> new RuntimeException("Practicante no encontrado"));
-//
-//        if (assistanceRepository.existsByInternAndCheckIn(intern, LocalDate.now())) {
-//            throw new RuntimeException("Ya se ha registrado la entrada del practicante");
-//        }
-//
-//        Assistance assistance = new Assistance();
-//        assistance.setIntern(intern);
-//        assistance.setCheckIn(LocalDate.now());
-//        assistance.setHoursWorked(0);
-//
-//        return assistanceRepository.save(assistance);
-        return null;
+
+        Intern intern = internRepository.findByUser_Dni(dni).
+                orElseThrow(() -> new RuntimeException("No se encontró el practicante con DNI: " + dni)
+        );
+
+        // Validar que no haya asistencias activas (sin Check-Out)
+        if (assistanceRepository.findActiveAssistanceByIntern(intern.getIdIntern()).isPresent()) {
+            throw new RuntimeException("El practicante ya tiene una asistencia activa.");
+        }
+
+        // Crear nueva asistencia
+        Assistance assistance = new Assistance();
+        assistance.setIntern(intern);
+        assistance.setCheckIn(LocalDateTime.now());
+
+        return assistanceRepository.save(assistance);
     }
 
     @Override
     public Assistance registerCheckOut(String dni) {
-//        Intern intern = internRepository.findByDni(dni)
-//                .orElseThrow(() -> new RuntimeException("Practicante no encontrado con DNI: " + dni));
-//
-//        Assistance assistance = assistanceRepository.findTodayAssistance(intern, LocalDate.now())
-//                .orElseThrow(() -> new RuntimeException("No se ha registrado una entrada hoy"));
-//
-//        if (assistance.getCheckOut() != null) {
-//            throw new RuntimeException("La salida ya ha sido registrada hoy");
-//        }
-//
-//        assistance.setCheckOut(LocalDate.now());
-//        assistance.setHoursWorked(calculateHoursWorked(assistance.getCheckIn(), assistance.getCheckOut()));
-//        return assistanceRepository.save(assistance);
-        return null;
+
+        Intern intern = internRepository.findByUser_Dni(dni).orElseThrow(
+                () -> new RuntimeException("No se encontró el practicante con DNI: " + dni)
+        );
+
+        // Obtener la asistencia activa
+        Assistance activeAssistance = assistanceRepository.findActiveAssistanceByIntern(intern.getIdIntern()).orElseThrow(
+                () -> new RuntimeException("No se encontró una asistencia activa para el practicante.")
+        );
+
+        // Registrar Check-Out y guardar
+        activeAssistance.setCheckOut(LocalDateTime.now());
+        assistanceRepository.save(activeAssistance);
+
+        // Actualizar horas trabajadas totales del practicante
+        updateTotalHours(intern);
+
+        return assistanceRepository.save(activeAssistance);
     }
 
     @Override
-    public List<Assistance> getAssistancesByDate(LocalDate date, int page, int size) {
-//        return assistanceRepository.findAllByDate(date, page, size);
-        return null;
+    public Page<Assistance> getAssistancesByDate(LocalDate date, Pageable pageable) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+        return assistanceRepository.findAllByCheckInBetween(startOfDay, endOfDay, pageable);
     }
 
     @Override
-    public List<Assistance> searchAssistancesByInternName(String name, int page, int size) {
-//        return assistanceRepository.searchByInternName(name, page, size);
-        return null;
+    public Page<Assistance> searchAssistancesByInternName(String name, Pageable pageable) {
+        return assistanceRepository.findByInternFullName(name, pageable);
+    }
+
+    @Override
+    public Page<Assistance> findAssistancesByArea(String areaName, Pageable pageable) {
+        return assistanceRepository.findByIntern_AreaUniversity_Area_Name(areaName, pageable);
     }
 
     @Override
     public double getHoursWorkedByInternOnDate(String dni, LocalDate date) {
-//        return assistanceRepository.getHoursWorkedByInternOnDate(dni, date);
-        return 0;
-    }
+        Intern intern = internRepository.findByUser_Dni(dni).orElseThrow(
+                () -> new RuntimeException("No se encontró el practicante con DNI: " + dni)
+        );
 
-    @Override
-    public int getAttendanceCountByAreaOnDate(String areaName, LocalDate date) {
-//        return assistanceRepository.getAttendanceCountByAreaOnDate(areaName, date);
-        return 0;
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+        return assistanceRepository.sumHoursWorkedByInternAndDate(intern.getIdIntern(), startOfDay, endOfDay);
     }
 
     @Override
     public double getMonthlyHoursWorkedByArea(String areaName, int month, int year) {
-//        return assistanceRepository.getMonthlyHoursByArea(areaName, month, year);
-        return 0;
+        return assistanceRepository.sumHoursWorkedByAreaAndMonth(areaName, month, year);
     }
 
     @Override
     public double getMonthlyHoursWorkedByUniversity(String universityName, int month, int year) {
-//        return assistanceRepository.getMonthlyHoursByUniversity(universityName, month, year);
-        return 0;
+        return assistanceRepository.sumHoursWorkedByUniversityAndMonth(universityName, month, year);
     }
 
-    private double calculateHoursWorked(LocalDate checkIn, LocalDate checkOut) {
-//        LocalDateTime checkInDateTime = checkIn.atStartOfDay();
-//        LocalDateTime checkOutDateTime = checkOut.atStartOfDay();
-
-        return Duration.between(checkIn, checkOut).toHours();
+    @Override
+    public boolean hasOverlap(String idIntern, LocalDateTime checkIn, LocalDateTime checkOut) {
+        return assistanceRepository.hasOverlap(idIntern, checkIn, checkOut);
     }
+
 }

@@ -1,6 +1,7 @@
 package com.mpch.controlDeAsistencias_backend.servicesImpl;
 
 import com.mpch.controlDeAsistencias_backend.model.University;
+import com.mpch.controlDeAsistencias_backend.repository.InternRepository;
 import com.mpch.controlDeAsistencias_backend.repository.UniversityRepository;
 import com.mpch.controlDeAsistencias_backend.services.UniversityService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,39 +9,47 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.UUID;
-
 @Service
 public class UniversityServiceImpl implements UniversityService {
 
     @Autowired
     private UniversityRepository universityRepository;
 
-    private void validateUniversity(UUID idUniversity, String name, String acronym) {
-        universityRepository.findByName(name).ifPresent(existingUniversity -> {
-            if (!existingUniversity.getIdUniversity().equals(idUniversity)) {
-                throw new RuntimeException("Ya existe una universidad con el nombre: " + name);
-            }
-        });
+    @Autowired
+    private InternRepository internRepository;
 
-        universityRepository.findByAcronym(acronym).ifPresent(existingUniversity -> {
-            if (!existingUniversity.getIdUniversity().equals(idUniversity)) {
-                throw new RuntimeException("Ya existe una universidad con el acrónimo: " + acronym);
-            }
-        });
+    // Validar nombre único
+    private void validateUniqueName(String name) {
+        if (universityRepository.existsByName(name)) {
+            throw new RuntimeException("La universidad con el nombre '" + name + "' ya existe.");
+        }
+    }
+
+    // Validar universidad existente
+    private void validateExisting(Long idUniversity) {
+        if (!universityRepository.existsById(idUniversity)) {
+            throw new IllegalArgumentException("Universidad no encontrada con el ID " + idUniversity);
+        }
+    }
+
+    // Validar que la universidad no tenga estudiantes registrados
+    private void validateUniversityInUse(Long idUniversity) {
+        boolean isInUse = internRepository.existsByAreaUniversity_University_IdUniversity(idUniversity);
+        if (isInUse) {
+            throw new RuntimeException("La universidad no se puede eliminar porque tiene estudiantes registrados.");
+        }
     }
 
     @Override
     public University createUniversity(University university) {
-        validateUniversity(university.getIdUniversity(), university.getName(), university.getAcronym());
+        validateUniqueName(university.getName());
         return universityRepository.save(university);
     }
 
     @Override
-    public University getUniversityById(UUID idUniversity) {
+    public University getUniversityById(Long idUniversity) {
         return universityRepository.findById(idUniversity).orElseThrow(
-                () -> new RuntimeException("No se encontró la universidad con ese ID")
+                () -> new RuntimeException("Universidad no encontrada")
         );
     }
 
@@ -50,8 +59,8 @@ public class UniversityServiceImpl implements UniversityService {
     }
 
     @Override
-    public List<University> searchUniversityByName(String name, int page, int size) {
-        return universityRepository.searchByName(name, page, size);
+    public Page<University> searchUniversityByName(String name, Pageable pageable) {
+        return universityRepository.findByNameContainingIgnoreCase(name, pageable);
     }
 
     @Override
@@ -60,14 +69,11 @@ public class UniversityServiceImpl implements UniversityService {
     }
 
     @Override
-    public University updateUniversity(UUID idUniversity, University university) {
-        University existingUniversity = getUniversityById(idUniversity);
+    public University updateUniversity(Long idUniversity, University university) {
+        validateExisting(idUniversity);
+        validateUniqueName(university.getName());
 
-        if (!existingUniversity.getName().equals(university.getName()) ||
-                !existingUniversity.getAcronym().equals(university.getAcronym())) {
-            validateUniversity(idUniversity, university.getName(), university.getAcronym());
-        }
-
+        University existingUniversity = universityRepository.findById(idUniversity).orElseThrow();
         existingUniversity.setName(university.getName());
         existingUniversity.setAcronym(university.getAcronym());
         existingUniversity.setPhoto(university.getPhoto());
@@ -77,7 +83,10 @@ public class UniversityServiceImpl implements UniversityService {
     }
 
     @Override
-    public void deleteUniversity(UUID idUniversity) {
+    public void deleteUniversity(Long idUniversity) {
+        validateExisting(idUniversity);
+        validateUniversityInUse(idUniversity);
+
         universityRepository.deleteById(idUniversity);
     }
 }

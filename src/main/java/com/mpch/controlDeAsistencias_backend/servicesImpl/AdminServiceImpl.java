@@ -5,17 +5,12 @@ import com.mpch.controlDeAsistencias_backend.model.Role;
 import com.mpch.controlDeAsistencias_backend.model.User;
 import com.mpch.controlDeAsistencias_backend.repository.AdminRepository;
 import com.mpch.controlDeAsistencias_backend.repository.RoleRepository;
-import com.mpch.controlDeAsistencias_backend.repository.UserRepository;
 import com.mpch.controlDeAsistencias_backend.services.AdminService;
 import com.mpch.controlDeAsistencias_backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -24,26 +19,34 @@ public class AdminServiceImpl implements AdminService {
     private AdminRepository adminRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
-    private UserService userService;
+    // Validar que exista por lo menos un administrador
+    private void validateSingleAdmin() {
+        if (adminRepository.count() == 1) {
+            throw new RuntimeException("El sistema no puede quedar sin administradores.");
+        }
+    }
 
     @Override
     public Admin saveAdmin(Admin admin) {
 
-        Role adminRole = roleRepository.findByName("administrador");
+        Role adminRole = roleRepository.findById(1L).orElseGet(() -> {
+            Role newRole = new Role();
+            newRole.setIdRole(1L);
+            newRole.setName("administrador");
+            return roleRepository.save(newRole);
+        });
 
-        User user = admin.getUser();
-        user.setRole(adminRole);
+        admin.getUser().setRole(adminRole);
 
-        user = userService.save(user);
-
-        String adminId = "A24" + user.getDni();
-        admin.setIdAdmin(adminId);
+        if (admin.getUser().getIdUser() == null) {
+            User savedUser = userService.save(admin.getUser());
+            admin.setUser(savedUser);
+        }
 
         return adminRepository.save(admin);
     }
@@ -51,8 +54,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Admin getAdminById(String idAdmin) {
         return adminRepository.findById(idAdmin).orElseThrow(
-                () -> new RuntimeException("No se encontró el administrador con ese ID")
-        );
+                () -> new RuntimeException("No se encontró el administrador."));
     }
 
     @Override
@@ -61,8 +63,15 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<Admin> searchAdminsByName(String name, int page, int size) {
-        return adminRepository.searchByName(name, page, size);
+    public Page<Admin> searchAdminsByName(String name, Pageable pageable) {
+        return adminRepository.
+                findByFullName(name, pageable);
+    }
+
+    @Override
+    public Page<Admin> searchAdminsByDni(String dni, Pageable pageable) {
+        return adminRepository.
+                findByUser_DniContainingIgnoreCase(dni, pageable);
     }
 
     @Override
@@ -72,19 +81,22 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public Admin updateAdmin(String idAdmin, Admin admin) {
-        Admin existingAdmin = getAdminById(idAdmin);
+        Admin existingAdmin = adminRepository.findById(idAdmin).orElseThrow(
+                () -> new RuntimeException("No se encontró el administrador.")
+        );
 
-        User updatedUser = admin.getUser();
-        updatedUser.setRole(existingAdmin.getUser().getRole());
-        updatedUser = userService.updateUser(existingAdmin.getUser().getIdUser(), updatedUser);
-
+        User updatedUser = userService.updateUser(existingAdmin.getUser().getIdUser(), admin.getUser());
         existingAdmin.setUser(updatedUser);
+
+        existingAdmin.setPassword(admin.getPassword());
 
         return adminRepository.save(existingAdmin);
     }
 
     @Override
-    public void deleteAdmin(UUID idUser) {
-        userRepository.deleteById(idUser);
+    public void deleteAdmin(String idAdmin) {
+        validateSingleAdmin();
+        adminRepository.deleteById(idAdmin);
+        userService.deleteUser(adminRepository.findById(idAdmin).get().getUser().getIdUser());
     }
 }

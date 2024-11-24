@@ -2,14 +2,12 @@ package com.mpch.controlDeAsistencias_backend.servicesImpl;
 
 import com.mpch.controlDeAsistencias_backend.model.Role;
 import com.mpch.controlDeAsistencias_backend.repository.RoleRepository;
+import com.mpch.controlDeAsistencias_backend.repository.UserRepository;
 import com.mpch.controlDeAsistencias_backend.services.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class RoleServiceImpl implements RoleService {
@@ -17,22 +15,39 @@ public class RoleServiceImpl implements RoleService {
     @Autowired
     private RoleRepository roleRepository;
 
-    private void validateRole(String name) {
-        Role role = roleRepository.findByName(name);
-        if (role != null) {
-            throw new RuntimeException("Rol ya existe");
-        }
+    @Autowired
+    private UserRepository userRepository;
 
+    // Validar nombre único
+    private void validateUniqueRoleName(String name) {
+        if (roleRepository.existsByName(name)) {
+            throw new RuntimeException("El rol con el nombre '" + name + "' ya existe.");
+        }
+    }
+
+    // Validar rol existente
+    private void validateExistingRole(Long idRole) {
+        if (!roleRepository.existsById(idRole)) {
+            throw new IllegalArgumentException("Rol no encontrado con el ID " + idRole);
+        }
+    }
+
+    // Validar que el rol no esté en uso
+    private void validateRoleInUse(Long idRole) {
+        boolean isInUse = userRepository.existsByRole_IdRole(idRole);
+        if (isInUse) {
+            throw new RuntimeException("El rol no se puede eliminar porque está en uso por usuarios.");
+        }
     }
 
     @Override
     public Role saveRole(Role role) {
-        validateRole(role.getName());
+        validateUniqueRoleName(role.getName());
         return roleRepository.save(role);
     }
 
     @Override
-    public Role findRoleById(UUID idRole) {
+    public Role findRoleById(Long idRole) {
         return roleRepository.findById(idRole).orElseThrow(
                 () -> new RuntimeException("Rol no encontrado")
         );
@@ -44,30 +59,27 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public List<Role> searchRoleByName(String name, int page, int size) {
-        return roleRepository.searchByName(name, page, size);
-    }
-
-    @Override
     public Long getTotalRoles() {
         return roleRepository.count();
     }
 
     @Override
-    public Role updateRole(UUID idRole, Role role) {
-        Role existingRole = findRoleById(idRole);
+    public Role updateRole(Long idRole, Role role) {
+        validateExistingRole(idRole);
+        validateUniqueRoleName(role.getName());
 
-        if (!existingRole.getName().equals(role.getName())) {
-            validateRole(role.getName());
-        }
-
+        Role existingRole = roleRepository.findById(idRole).orElseThrow();
         existingRole.setName(role.getName());
 
         return roleRepository.save(existingRole);
     }
 
     @Override
-    public void deleteRole(UUID idRole) {
+    public void deleteRole(Long idRole) {
+        validateExistingRole(idRole);
+        validateRoleInUse(idRole);
+
         roleRepository.deleteById(idRole);
     }
+
 }

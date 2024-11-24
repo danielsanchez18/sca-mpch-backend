@@ -5,22 +5,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface AreaService {
 
-    Area addArea(Area area);
+    Area addArea(Area area) throws Exception;
 
-    Area getAreaById(UUID idArea);
+    Area getAreaById(Long idArea);
 
     Page<Area> getAllAreas(Pageable pageable);
 
-    List<Area> searchAreaByName(String name, int page, int size);
+    Page<Area> searchAreaByName(String name, Pageable pageable);
 
     Long getTotalAreas();
 
-    Area updateArea(UUID idArea, Area area);
+    Area updateArea(Long idArea, Area area);
 
-    void deleteArea(UUID idArea);
+    void deleteArea(Long idArea);
 
 }

@@ -2,8 +2,6 @@ package com.mpch.controlDeAsistencias_backend.model;
 
 import jakarta.persistence.*;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "intern")
 public class Intern {
@@ -12,28 +10,31 @@ public class Intern {
     @Column(name = "id_intern", nullable = false, unique = true, length = 11)
     private String idIntern;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "id_user", referencedColumnName = "id_user", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "id_area", referencedColumnName = "id_area", nullable = false)
-    private Area area;
-
-    @ManyToOne
-    @JoinColumn(name = "id_university", referencedColumnName = "id_university", nullable = false)
-    private University university;
+    @JoinColumn(name = "id_area_university", referencedColumnName = "id_area_university", nullable = false)
+    private AreaUniversity areaUniversity;
 
     @Column(name = "total_hours", nullable = false)
-    private Long totalHours;
+    private double totalHours;
+
+    @PrePersist
+    private void generateId() {
+        if (idIntern == null || idIntern.isEmpty()) {
+            long count = System.currentTimeMillis() % 1000000; // Generar un número único basado en el tiempo
+            this.idIntern = "I24" + String.format("%07d", count);
+        }
+    }
 
     public Intern() { }
 
-    public Intern(String idIntern, User user, Area area, University university, Long totalHours) {
+    public Intern(String idIntern, User user, AreaUniversity areaUniversity, double totalHours) {
         this.idIntern = idIntern;
         this.user = user;
-        this.area = area;
-        this.university = university;
+        this.areaUniversity = areaUniversity;
         this.totalHours = totalHours;
     }
 
@@ -53,27 +54,19 @@ public class Intern {
         this.user = user;
     }
 
-    public Area getArea() {
-        return area;
+    public AreaUniversity getAreaUniversity() {
+        return areaUniversity;
     }
 
-    public void setArea(Area area) {
-        this.area = area;
+    public void setAreaUniversity(AreaUniversity areaUniversity) {
+        this.areaUniversity = areaUniversity;
     }
 
-    public University getUniversity() {
-        return university;
-    }
-
-    public void setUniversity(University university) {
-        this.university = university;
-    }
-
-    public Long getTotalHours() {
+    public double getTotalHours() {
         return totalHours;
     }
 
-    public void setTotalHours(Long totalHours) {
+    public void setTotalHours(double totalHours) {
         this.totalHours = totalHours;
     }
 

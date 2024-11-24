@@ -4,22 +4,19 @@ import com.mpch.controlDeAsistencias_backend.model.University;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-import java.util.UUID;
-
 public interface UniversityService {
 
     University createUniversity(University university);
 
-    University getUniversityById(UUID idUniversity);
+    University getUniversityById(Long idUniversity);
 
     Page<University> getAllUniversities(Pageable pageable);
 
-    List<University> searchUniversityByName(String name, int page, int size);
+    Page<University> searchUniversityByName(String name, Pageable pageable);
 
     Long getTotalUniversities();
 
-    University updateUniversity(UUID idUniversity, University university);
+    University updateUniversity(Long idUniversity, University university);
 
-    void deleteUniversity(UUID idUniversity);
+    void deleteUniversity(Long idUniversity);
 }

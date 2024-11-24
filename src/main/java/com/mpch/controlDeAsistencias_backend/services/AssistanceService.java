@@ -1,8 +1,11 @@
 package com.mpch.controlDeAsistencias_backend.services;
 
 import com.mpch.controlDeAsistencias_backend.model.Assistance;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AssistanceService {
@@ -11,16 +14,18 @@ public interface AssistanceService {
 
     Assistance registerCheckOut(String dni);
 
-    List<Assistance> getAssistancesByDate(LocalDate date, int page, int size);
+    Page<Assistance> getAssistancesByDate(LocalDate date, Pageable pageable);
 
-    List<Assistance> searchAssistancesByInternName(String name, int page, int size);
+    Page<Assistance> searchAssistancesByInternName(String name, Pageable pageable);
+
+    Page<Assistance> findAssistancesByArea(String areaName, Pageable pageable);
 
     double getHoursWorkedByInternOnDate(String dni, LocalDate date);
-
-    int getAttendanceCountByAreaOnDate(String areaName, LocalDate date);
 
     double getMonthlyHoursWorkedByArea(String areaName, int month, int year);
 
     double getMonthlyHoursWorkedByUniversity(String universityName, int month, int year);
+
+    boolean hasOverlap(String idIntern, LocalDateTime checkIn, LocalDateTime checkOut);
 
 }

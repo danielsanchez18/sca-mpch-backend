@@ -2,44 +2,38 @@ package com.mpch.controlDeAsistencias_backend.model;
 
 import jakarta.persistence.*;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "area")
 public class Area {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_area")
-    private UUID idArea;
+    private Long idArea;
 
     @Column(name = "name", unique = true, nullable = false, length = 25)
     private String name;
 
     @Column(name = "nro_vacancies", nullable = false)
-    private Long nro_vacancies;
-
-    @Column(name = "hours_certified", nullable = false)
-    private Long hours_certified;
+    private Long nroVacancies;
 
     @Column(name = "status", nullable = false)
     private boolean status;
 
     public Area() { }
 
-    public Area(UUID idArea, String name, Long nro_vacancies, Long hours_certified, boolean status) {
+    public Area(Long idArea, String name, Long nroVacancies, boolean status) {
         this.idArea = idArea;
         this.name = name;
-        this.nro_vacancies = nro_vacancies;
-        this.hours_certified = hours_certified;
+        this.nroVacancies = nroVacancies;
         this.status = status;
     }
 
-    public UUID getIdArea() {
+    public Long getIdArea() {
         return idArea;
     }
 
-    public void setIdArea(UUID idArea) {
+    public void setIdArea(Long idArea) {
         this.idArea = idArea;
     }
 
@@ -51,20 +45,12 @@ public class Area {
         this.name = name;
     }
 
-    public Long getNro_vacancies() {
-        return nro_vacancies;
+    public Long getNroVacancies() {
+        return nroVacancies;
     }
 
-    public void setNro_vacancies(Long nro_vacancies) {
-        this.nro_vacancies = nro_vacancies;
-    }
-
-    public Long getHours_certified() {
-        return hours_certified;
-    }
-
-    public void setHours_certified(Long hours_certified) {
-        this.hours_certified = hours_certified;
+    public void setNroVacancies(Long nroVacancies) {
+        this.nroVacancies = nroVacancies;
     }
 
     public boolean isStatus() {

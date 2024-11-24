@@ -2,6 +2,7 @@ package com.mpch.controlDeAsistencias_backend.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -19,13 +20,17 @@ public class Certificated {
 
     @Column(name = "status", nullable = false)
     private boolean status;
+    
+    @Column(name = "generated_date", nullable = false)
+    private LocalDateTime generatedDate;
 
     public Certificated() { }
 
-    public Certificated(UUID idCertificated, Intern intern, boolean status) {
+    public Certificated(UUID idCertificated, Intern intern, boolean status, LocalDateTime generatedDate) {
         this.idCertificated = idCertificated;
         this.intern = intern;
         this.status = status;
+        this.generatedDate = generatedDate;
     }
 
     public UUID getIdCertificated() {
@@ -51,4 +56,13 @@ public class Certificated {
     public void setStatus(boolean status) {
         this.status = status;
     }
+
+    public LocalDateTime getGeneratedDate() {
+        return generatedDate;
+    }
+
+    public void setGeneratedDate(LocalDateTime generatedDate) {
+        this.generatedDate = generatedDate;
+    }
+
 }

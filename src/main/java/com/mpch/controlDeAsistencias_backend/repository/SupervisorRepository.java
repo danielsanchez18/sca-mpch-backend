@@ -1,18 +1,24 @@
 package com.mpch.controlDeAsistencias_backend.repository;
 
 import com.mpch.controlDeAsistencias_backend.model.Supervisor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
+public interface SupervisorRepository extends JpaRepository<Supervisor, String> {
 
-public interface SupervisorRepository extends JpaRepository<Supervisor, String>{
+    boolean existsByArea_IdArea(Long idArea);
 
-    @Query(value = "CALL sp_supervisor_search_by_name(:name, :page, :size)", nativeQuery = true)
-    List<Supervisor> searchByName (@Param("name") String name, @Param("page") int page, @Param("size") int size);
+    @Query(value = "SELECT s.* FROM supervisor s " +
+            "JOIN user u ON s.id_user = u.id_user " +
+            "WHERE LOWER(CONCAT(u.name, ' ', u.lastname)) LIKE LOWER(CONCAT('%', :fullName, '%'))",
+            nativeQuery = true)
+    Page<Supervisor> findByFullName(@Param("fullName") String fullName, Pageable pageable);
 
-    @Query(value = "CALL sp_supervisor_find_by_area(:area, :page, :size)", nativeQuery = true)
-    List<Supervisor> findByArea (@Param("area") String area, @Param("page") int page, @Param("size") int size);
+    Page<Supervisor> findByUser_DniContainingIgnoreCase(String dni, Pageable pageable);
+
+    Page<Supervisor> findByArea_NameContainingIgnoreCase(String area, Pageable pageable);
 
 }

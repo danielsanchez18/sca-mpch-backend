@@ -13,9 +13,17 @@ public class Admin {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "id_user", referencedColumnName = "id_user", nullable = false)
     private User user;
+
+    @PrePersist
+    private void generateId() {
+        if (idAdmin == null || idAdmin.isEmpty()) {
+            long count = System.currentTimeMillis() % 1000000; // Generar un número único basado en el tiempo
+            this.idAdmin = "A24" + String.format("%07d", count);
+        }
+    }
 
     public Admin() { }
 
@@ -48,4 +56,5 @@ public class Admin {
     public void setUser(User user) {
         this.user = user;
     }
+
 }

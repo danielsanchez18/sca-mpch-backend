@@ -4,9 +4,6 @@ import com.mpch.controlDeAsistencias_backend.model.Admin;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-import java.util.UUID;
-
 public interface AdminService {
 
     Admin saveAdmin(Admin admin);
@@ -15,11 +12,14 @@ public interface AdminService {
 
     Page<Admin> getAllAdmins(Pageable pageable);
 
-    List<Admin> searchAdminsByName(String name, int page, int size);
+    Page<Admin> searchAdminsByName(String name, Pageable pageable);
+
+    Page<Admin> searchAdminsByDni(String dni, Pageable pageable);
 
     Long getTotalAdmins();
 
     Admin updateAdmin(String idAdmin, Admin admin);
 
-    void deleteAdmin(UUID idUser);
+    void deleteAdmin(String idAmind);
+
 }

@@ -15,15 +15,13 @@ public interface UserService {
 
     Page<User> findAllUsers(Pageable pageable);
 
-    List<User> findUsersByRole(String role, int page, int size);
+    Page<User> searchUsersByName(String name, Pageable pageable);
 
-    List<User> searchUsersByName(String name, int page, int size);
+    Page<User> findUsersByRole(Long idRole, Pageable pageable);
 
-    List<User> searchUsersByDni(String dni, int page, int size);
+    Page<User> searchUsersByDni(String dni, Pageable pageable);
 
-    List<User> findUsersEnabled(int page, int size);
-
-    List<User> findUsersDisabled(int page, int size);
+    Page<User> findUsersByStatus(boolean status, Pageable pageable);
 
     Long getTotalUsers();
 

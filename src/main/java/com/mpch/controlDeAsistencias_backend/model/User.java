@@ -2,6 +2,7 @@ package com.mpch.controlDeAsistencias_backend.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -27,16 +28,16 @@ public class User {
     @Column(name = "dni", nullable = false,  unique = true, length = 8)
     private String dni;
 
-    @Column(name = "age", nullable = false)
-    private Long age;
-
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", nullable = false)
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at", nullable = false)
-    private Date updatedAt;
+    private LocalDateTime updatedAt;
+
+    @Column(name = "birthDate", nullable = false)
+    private Date birthdate;
 
     @Column(name = "photo")
     private String photo;
@@ -46,15 +47,15 @@ public class User {
 
     public User() { }
 
-    public User(UUID idUser, Role role, String name, String lastname, String dni, Long age, Date createdAt, Date updatedAt, String photo, boolean status) {
+    public User(UUID idUser, Role role, String name, String lastname, String dni, LocalDateTime createdAt, LocalDateTime updatedAt, Date birthdate, String photo, boolean status) {
         this.idUser = idUser;
         this.role = role;
         this.name = name;
         this.lastname = lastname;
         this.dni = dni;
-        this.age = age;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.birthdate = birthdate;
         this.photo = photo;
         this.status = status;
     }
@@ -69,6 +70,14 @@ public class User {
 
     public Role getRole() {
         return role;
+    }
+
+    public Date getBirthdate() {
+        return birthdate;
+    }
+
+    public void setBirthdate(Date birthdate) {
+        this.birthdate = birthdate;
     }
 
     public void setRole(Role role) {
@@ -99,27 +108,19 @@ public class User {
         this.dni = dni;
     }
 
-    public Long getAge() {
-        return age;
-    }
-
-    public void setAge(Long age) {
-        this.age = age;
-    }
-
-    public Date getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
+    public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
 

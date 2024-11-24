@@ -2,7 +2,9 @@ package com.mpch.controlDeAsistencias_backend.model;
 
 import jakarta.persistence.*;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -18,18 +20,31 @@ public class Assistance {
     @JoinColumn(name = "id_intern", referencedColumnName = "id_intern", nullable = false)
     private Intern intern;
 
+    // @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "check_in")
-    private LocalDate checkIn;
+    private LocalDateTime checkIn;
 
+    // @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "check_out")
-    private LocalDate checkOut;
+    private LocalDateTime checkOut;
 
     @Column(name = "hours_worked", nullable = false)
     private double hoursWorked;
 
+    @PrePersist
+    @PreUpdate
+    private void calculateHoursWorked() {
+        if (checkIn != null && checkOut != null) {
+            long seconds = Duration.between(checkIn, checkOut).getSeconds();
+            this.hoursWorked = Math.min(10.0, seconds / 3600.0); // Máximo 10 horas
+        } else {
+            this.hoursWorked = 0.0; // Si no hay Check-Out, no hay horas
+        }
+    }
+
     public Assistance() { }
 
-    public Assistance(UUID idAssistance, Intern intern, LocalDate checkIn, LocalDate checkOut, double hoursWorked) {
+    public Assistance(UUID idAssistance, Intern intern, LocalDateTime checkIn, LocalDateTime checkOut, double hoursWorked) {
         this.idAssistance = idAssistance;
         this.intern = intern;
         this.checkIn = checkIn;
@@ -53,19 +68,19 @@ public class Assistance {
         this.intern = intern;
     }
 
-    public LocalDate getCheckIn() {
+    public LocalDateTime getCheckIn() {
         return checkIn;
     }
 
-    public void setCheckIn(LocalDate checkIn) {
+    public void setCheckIn(LocalDateTime checkIn) {
         this.checkIn = checkIn;
     }
 
-    public LocalDate getCheckOut() {
+    public LocalDateTime getCheckOut() {
         return checkOut;
     }
 
-    public void setCheckOut(LocalDate checkOut) {
+    public void setCheckOut(LocalDateTime checkOut) {
         this.checkOut = checkOut;
     }
 

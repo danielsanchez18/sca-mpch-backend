@@ -1,38 +1,55 @@
 package com.mpch.controlDeAsistencias_backend.repository;
 
 import com.mpch.controlDeAsistencias_backend.model.Assistance;
-import com.mpch.controlDeAsistencias_backend.model.Intern;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface AssistanceRepository extends JpaRepository<Assistance, UUID>{
+public interface AssistanceRepository extends JpaRepository<Assistance, UUID> {
 
-//    boolean existsByInternAndCheckIn(Intern intern, LocalDate checkIn);
-//
-//    @Query(value = "CALL sp_assistance_find_today(:internId, :date)", nativeQuery = true)
-//    Optional<Assistance> findTodayAssistance(@Param("internId") String internId, @Param("date") LocalDate date);
-//
-//    @Query(value = "CALL sp_assistance_find_by_date(:date)", nativeQuery = true)
-//    List<Assistance> findAllByDate(@Param("date") LocalDate date);
-//
-//    @Query(value = "CALL sp_assistance_search_by_intern_name(:name, :page, :size)", nativeQuery = true)
-//    List<Assistance> searchByInternName(@Param("name") String name, @Param("page") int page, @Param("size") int size);
-//
-//    @Query(value = "CALL sp_assistance_hours_worked_by_intern_on_date(:dni, :date)", nativeQuery = true)
-//    double getHoursWorkedByInternOnDate(@Param("dni") String dni, @Param("date") LocalDate date);
-//
-//    @Query(value = "CALL sp_assistance_count_by_area_on_date(:areaName, :date)", nativeQuery = true)
-//    int getAttendanceCountByAreaOnDate(@Param("areaName") String areaName, @Param("date") LocalDate date);
-//
-//    @Query(value = "CALL sp_assistance_hours_by_area(:areaName, :month, :year)", nativeQuery = true)
-//    double getMonthlyHoursByArea(@Param("areaName") String areaName, @Param("month") int month, @Param("year") int year);
-//
-//    @Query(value = "CALL sp_assistance_hours_by_university(:universityName, :month, :year)", nativeQuery = true)
-//    double getMonthlyHoursByUniversity(@Param("universityName") String universityName, @Param("month") int month, @Param("year") int year);
+    @Query("SELECT a FROM Assistance a WHERE a.intern.idIntern = :idIntern AND a.checkOut IS NULL")
+    Optional<Assistance> findActiveAssistanceByIntern(@Param("idIntern") String idIntern);
+
+    @Query("SELECT COUNT(a) > 0 FROM Assistance a WHERE a.intern.idIntern = :idIntern " +
+            "AND ((:checkIn BETWEEN a.checkIn AND a.checkOut) OR (:checkOut BETWEEN a.checkIn AND a.checkOut))")
+    boolean hasOverlap(@Param("idIntern") String idIntern, @Param("checkIn") LocalDateTime checkIn, @Param("checkOut") LocalDateTime checkOut);
+
+    Page<Assistance> findByIntern_AreaUniversity_Area_Name(String nameArea, Pageable pageable);
+
+    @Query("SELECT a FROM Assistance a " +
+            "WHERE LOWER(CONCAT(a.intern.user.name, ' ', a.intern.user.lastname)) " +
+            "LIKE LOWER(CONCAT('%', :fullName, '%'))")
+    Page<Assistance> findByInternFullName(@Param("fullName") String fullName, Pageable pageable);
+
+    @Query("SELECT SUM(a.hoursWorked) FROM Assistance a WHERE a.intern.idIntern = :idIntern " +
+            "AND a.checkIn BETWEEN :start AND :end")
+    double sumHoursWorkedByInternAndDate(@Param("idIntern") String idIntern,
+                                         @Param("start") LocalDateTime start,
+                                         @Param("end") LocalDateTime end);
+
+    @Query("SELECT SUM(a.hoursWorked) FROM Assistance a WHERE a.intern.areaUniversity.area.name = :areaName " +
+            "AND FUNCTION('MONTH', a.checkIn) = :month AND FUNCTION('YEAR', a.checkIn) = :year")
+    double sumHoursWorkedByAreaAndMonth(@Param("areaName") String areaName,
+                                        @Param("month") int month,
+                                        @Param("year") int year);
+
+    @Query("SELECT SUM(a.hoursWorked) FROM Assistance a WHERE a.intern.areaUniversity.university.name = :universityName " +
+            "AND FUNCTION('MONTH', a.checkIn) = :month AND FUNCTION('YEAR', a.checkIn) = :year")
+    double sumHoursWorkedByUniversityAndMonth(@Param("universityName") String universityName,
+                                              @Param("month") int month,
+                                              @Param("year") int year);
+
+    @Query("SELECT a FROM Assistance a WHERE a.checkIn BETWEEN :start AND :end")
+    Page<Assistance> findAllByCheckInBetween(@Param("start") LocalDateTime start,
+                                             @Param("end") LocalDateTime end,
+                                             Pageable pageable);
+
+    @Query("SELECT COALESCE(SUM(a.hoursWorked), 0) FROM Assistance a WHERE a.intern.idIntern = :idIntern")
+    double getTotalHoursWorkedByIntern(@Param("idIntern") String idIntern);
 }

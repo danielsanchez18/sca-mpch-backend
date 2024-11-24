@@ -6,39 +6,50 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/role")
-//@CrossOrigin("*")
-@CrossOrigin(origins = "http://localhost:4200")
-
 public class RoleController {
 
     @Autowired
     private RoleService roleService;
 
-    @PostMapping("/save")
-    public void addRole(@RequestBody Role role) {
-        roleService.saveRole(role);
+    @PostMapping("/add")
+    public ResponseEntity<?> addRole(@RequestBody Role role) {
+        try {
+            Role createdRole = roleService.saveRole(role);
+            return ResponseEntity.status(HttpStatus.CREATED).body(successResponse("Rol creado exitosamente", createdRole));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse(ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al crear el rol"));
+        }
     }
 
-    @GetMapping("/id/{idRole}")
-    public Role getRoleById(@PathVariable UUID idRole) {
-        return roleService.findRoleById(idRole);
+    @GetMapping("/id/{id}")
+    public ResponseEntity<?> getRoleById(@PathVariable Long id) {
+        try {
+            Role role = roleService.findRoleById(id);
+            return ResponseEntity.ok(successResponse("Rol encontrado", role));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse(ex.getMessage()));
+        }
     }
 
-    @GetMapping("/all")
-    public Page<Role> getAllRoles(@PageableDefault(page = 0, size = 10) Pageable pageable) {
-        return roleService.getAllRoles(pageable);
-    }
-
-    @GetMapping("/search/{name}")
-    public List<Role> searchRoleByName(@PathVariable String name, @PageableDefault(page = 1, size = 10) Pageable pageable) {
-        return roleService.searchRoleByName(name, pageable.getPageNumber(), pageable.getPageSize());
+    @GetMapping
+    public ResponseEntity<?> getAllRoles(@PageableDefault(size = 10, page = 0) Pageable pageable) {
+        try {
+            Page<Role> roles = roleService.getAllRoles(pageable);
+            return ResponseEntity.ok(successResponse("Roles obtenidos exitosamente", roles));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al obtener los roles"));
+        }
     }
 
     @GetMapping("/total")
@@ -46,14 +57,41 @@ public class RoleController {
         return roleService.getTotalRoles();
     }
 
-    @PutMapping("/update/{idRole}")
-    public Role updateRole(@PathVariable UUID idRole, @RequestBody Role role) {
-        return roleService.updateRole(idRole, role);
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateRole(@PathVariable Long id, @RequestBody Role role) {
+        try {
+            Role updatedRole = roleService.updateRole(id, role);
+            return ResponseEntity.ok(successResponse("Rol actualizado exitosamente", updatedRole));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse(ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al actualizar el rol"));
+        }
     }
 
-    @DeleteMapping("/delete/{idRole}")
-    public void deleteRole(@PathVariable UUID idRole) {
-        roleService.deleteRole(idRole);
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteRole(@PathVariable Long id) {
+        try {
+            roleService.deleteRole(id);
+            return ResponseEntity.ok(successResponse("Rol eliminado exitosamente", null));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse(ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al eliminar el rol"));
+        }
+    }
+
+    private Map<String, Object> successResponse(String message, Object data) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", message);
+        response.put("data", data);
+        return response;
+    }
+
+    private Map<String, String> errorResponse(String message) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", message);
+        return response;
     }
 
 }

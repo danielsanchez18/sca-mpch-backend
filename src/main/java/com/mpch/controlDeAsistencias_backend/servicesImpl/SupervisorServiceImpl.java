@@ -3,19 +3,14 @@ package com.mpch.controlDeAsistencias_backend.servicesImpl;
 import com.mpch.controlDeAsistencias_backend.model.Role;
 import com.mpch.controlDeAsistencias_backend.model.Supervisor;
 import com.mpch.controlDeAsistencias_backend.model.User;
-import com.mpch.controlDeAsistencias_backend.repository.AreaRepository;
 import com.mpch.controlDeAsistencias_backend.repository.RoleRepository;
 import com.mpch.controlDeAsistencias_backend.repository.SupervisorRepository;
-import com.mpch.controlDeAsistencias_backend.repository.UserRepository;
 import com.mpch.controlDeAsistencias_backend.services.SupervisorService;
 import com.mpch.controlDeAsistencias_backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class SupervisorServiceImpl implements SupervisorService {
@@ -24,31 +19,31 @@ public class SupervisorServiceImpl implements SupervisorService {
     private SupervisorRepository supervisorRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
-    private AreaRepository areaRepository;
-
     @Override
     public Supervisor saveSupervisor(Supervisor supervisor) {
 
-        Role supervisorRole = roleRepository.findByName("supervisor");
-        User user = supervisor.getUser();
-        user.setRole(supervisorRole);
+        // Validar que no exista ya un supervisor en el área
+        if (supervisorRepository.existsByArea_IdArea(supervisor.getArea().getIdArea())) {
+            throw new RuntimeException("El área ya tiene un supervisor asignado.");
+        }
 
-        user = userService.save(user);
+        Role supervisorRole = roleRepository.findById(2L).orElseGet(() -> {
+            Role newRole = new Role();
+            newRole.setIdRole(2L);
+            newRole.setName("supervisor");
+            return roleRepository.save(newRole);
+        });
 
-        String supervisorId = "S24" + user.getDni();
-        supervisor.setIdSupervisor(supervisorId);
+        supervisor.getUser().setRole(supervisorRole);
 
-        if (!areaRepository.existsById(supervisor.getArea().getIdArea())) {
-            throw new RuntimeException("Area no encontrada");
+        if (supervisor.getUser().getIdUser() == null) {
+            User savedUser = userService.save(supervisor.getUser());
+            supervisor.setUser(savedUser);
         }
 
         return supervisorRepository.save(supervisor);
@@ -56,10 +51,8 @@ public class SupervisorServiceImpl implements SupervisorService {
 
     @Override
     public Supervisor getSupervisorById(String idSupervisor) {
-        return supervisorRepository.findById(idSupervisor).orElseThrow(
-                () -> new RuntimeException("Supervisor no encontrado")
-
-        );
+        return supervisorRepository.findById(idSupervisor)
+                .orElseThrow(() -> new RuntimeException("Supervisor no encontrado."));
     }
 
     @Override
@@ -68,39 +61,49 @@ public class SupervisorServiceImpl implements SupervisorService {
     }
 
     @Override
-    public List<Supervisor> searchSupervisorsByName(String name, int page, int size) {
-        return supervisorRepository.searchByName(name, page, size);
+    public Page<Supervisor> searchSupervisorsByName(String name, Pageable pageable) {
+        return supervisorRepository.findByFullName(name, pageable);
     }
 
     @Override
-    public List<Supervisor> getSupervisorsByArea(String area, int page, int size) {
-        return supervisorRepository.findByArea(area, page, size);
+    public Page<Supervisor> getSupervisorsByDni(String area, Pageable pageable) {
+        return supervisorRepository.findByUser_DniContainingIgnoreCase(area, pageable);
     }
 
     @Override
-    public Long countSupervisors() {
+    public Page<Supervisor> getSupervisorsByArea(String area, Pageable pageable) {
+        return supervisorRepository.findByArea_NameContainingIgnoreCase(area, pageable);
+    }
+
+    @Override
+    public Long getTotalSupervisors() {
         return supervisorRepository.count();
     }
 
     @Override
     public Supervisor updateSupervisor(String idSupervisor, Supervisor supervisor) {
-        Supervisor existingSupervisor = getSupervisorById(idSupervisor);
 
-        User updatedUser = supervisor.getUser();
-        updatedUser.setRole(existingSupervisor.getUser().getRole());
-        updatedUser = userService.updateUser(existingSupervisor.getUser().getIdUser(), updatedUser);
+        Supervisor existingSupervisor = supervisorRepository.findById(idSupervisor).orElseThrow(
+                () -> new RuntimeException("No se encontró el supervisor.")
+        );
 
+        boolean supervisorExistsInArea = supervisorRepository.existsByArea_IdArea(supervisor.getArea().getIdArea());
+        if (supervisorExistsInArea && !existingSupervisor.getArea().getIdArea().equals(supervisor.getArea().getIdArea())) {
+            throw new RuntimeException("El área ya tiene un supervisor asignado.");
+        }
+
+        User updatedUser = userService.updateUser(existingSupervisor.getUser().getIdUser(), supervisor.getUser());
         existingSupervisor.setUser(updatedUser);
 
-        if (!areaRepository.existsById(supervisor.getArea().getIdArea())) {
-            throw new RuntimeException("Área no encontrada para el supervisor");
-        }
+        existingSupervisor.setArea(supervisor.getArea());
+        existingSupervisor.setPassword(supervisor.getPassword());
 
         return supervisorRepository.save(existingSupervisor);
     }
 
     @Override
-    public void deleteSupervisor(UUID idUser) {
-        userRepository.deleteById(idUser);
+    public void deleteSupervisor(String idSupervisor) {
+        supervisorRepository.deleteById(idSupervisor);
+        userService.deleteUser(supervisorRepository.findById(idSupervisor).get().getUser().getIdUser());
     }
 }
