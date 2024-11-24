@@ -10,6 +10,7 @@ import com.mpch.controlDeAsistencias_backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,6 +24,9 @@ public class SupervisorServiceImpl implements SupervisorService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public Supervisor saveSupervisor(Supervisor supervisor) {
@@ -45,6 +49,8 @@ public class SupervisorServiceImpl implements SupervisorService {
             User savedUser = userService.save(supervisor.getUser());
             supervisor.setUser(savedUser);
         }
+
+        supervisor.setPassword(passwordEncoder.encode(supervisor.getPassword()));
 
         return supervisorRepository.save(supervisor);
     }

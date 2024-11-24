@@ -10,6 +10,7 @@ import com.mpch.controlDeAsistencias_backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,6 +24,9 @@ public class AdminServiceImpl implements AdminService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     // Validar que exista por lo menos un administrador
     private void validateSingleAdmin() {
@@ -48,6 +52,7 @@ public class AdminServiceImpl implements AdminService {
             admin.setUser(savedUser);
         }
 
+        admin.setPassword(passwordEncoder.encode(admin.getPassword()));
         return adminRepository.save(admin);
     }
 

@@ -2,6 +2,7 @@ package com.mpch.controlDeAsistencias_backend.controller;
 
 import com.mpch.controlDeAsistencias_backend.model.Admin;
 import com.mpch.controlDeAsistencias_backend.services.AdminService;
+import com.mpch.controlDeAsistencias_backend.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,9 +10,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
@@ -25,13 +23,13 @@ public class AdminController {
         try {
             Admin createdAdmin = adminService.saveAdmin(admin);
             return ResponseEntity.status(HttpStatus.CREATED).
-                    body(successResponse("Administrador creado exitosamente", createdAdmin));
+                    body(ResponseUtils.successResponse("Administrador creado exitosamente", createdAdmin));
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).
-                    body(errorResponse(ex.getMessage()));
+                    body(ResponseUtils.errorResponse(ex.getMessage()));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
-                    body(errorResponse("Error al crear el área"));
+                    body(ResponseUtils.errorResponse("Error al crear el área"));
         }
     }
 
@@ -39,9 +37,9 @@ public class AdminController {
     public ResponseEntity<?> getAdminById(@PathVariable String idAdmin) {
         try {
             Admin admin = adminService.getAdminById(idAdmin);
-            return ResponseEntity.ok(successResponse("Administrador encontrado", admin));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Administrador encontrado", admin));
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse(ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
 
@@ -49,9 +47,9 @@ public class AdminController {
     public ResponseEntity<?> getAllAdmins(@PageableDefault(size = 10, page = 0) Pageable pageable) {
         try {
             Page<Admin> admins = adminService.getAllAdmins(pageable);
-            return ResponseEntity.ok(successResponse("Lista de administradores obtenida exitosamente", admins));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Lista de administradores obtenida exitosamente", admins));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al obtener la lista de administradores"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al obtener la lista de administradores"));
         }
     }
 
@@ -59,9 +57,9 @@ public class AdminController {
     public ResponseEntity<?> searchAdminsByName(@PathVariable String name, @PageableDefault(size = 10, page = 0) Pageable pageable) {
         try {
             Page<Admin> admins = adminService.searchAdminsByName(name, pageable);
-            return ResponseEntity.ok(successResponse("Administradores encontrados", admins));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Administradores encontrados", admins));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar los administradores"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al buscar los administradores"));
         }
     }
 
@@ -69,9 +67,9 @@ public class AdminController {
     public ResponseEntity<?> searchAdminsByDni(@PathVariable String dni, @PageableDefault(size = 10, page = 0) Pageable pageable) {
         try {
             Page<Admin> admins = adminService.searchAdminsByDni(dni, pageable);
-            return ResponseEntity.ok(successResponse("Administradores encontrados", admins));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Administradores encontrados", admins));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar los administradores"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al buscar los administradores"));
         }
     }
 
@@ -84,9 +82,9 @@ public class AdminController {
     public ResponseEntity<?> updateAdmin(@PathVariable String idAdmin, @RequestBody Admin admin) {
         try {
             Admin updatedAdmin = adminService.updateAdmin(idAdmin, admin);
-            return ResponseEntity.ok(successResponse("Administrador actualizado exitosamente", updatedAdmin));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Administrador actualizado exitosamente", updatedAdmin));
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse(ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
 
@@ -94,23 +92,10 @@ public class AdminController {
     public ResponseEntity<?> deleteAdmin(@PathVariable String idAdmin) {
         try {
             adminService.deleteAdmin(idAdmin);
-            return ResponseEntity.ok(successResponse("Administrador eliminado exitosamente", null));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Administrador eliminado exitosamente", null));
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse(ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseUtils.errorResponse(ex.getMessage()));
         }
-    }
-
-    private Map<String, Object> successResponse(String message, Object data) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", message);
-        response.put("data", data);
-        return response;
-    }
-
-    private Map<String, String> errorResponse(String message) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", message);
-        return response;
     }
 
 }

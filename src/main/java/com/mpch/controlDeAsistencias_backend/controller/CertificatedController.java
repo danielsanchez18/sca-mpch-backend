@@ -2,6 +2,7 @@ package com.mpch.controlDeAsistencias_backend.controller;
 
 import com.mpch.controlDeAsistencias_backend.model.Certificated;
 import com.mpch.controlDeAsistencias_backend.services.CertificatedService;
+import com.mpch.controlDeAsistencias_backend.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,9 +10,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/certificated")
@@ -25,10 +23,10 @@ public class CertificatedController {
         try {
             Certificated certificated = certificatedService.generateCertificated(dni);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(successResponse("Certificado generado con éxito", certificated));
+                    .body(ResponseUtils.successResponse("Certificado generado con éxito", certificated));
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(errorResponse(ex.getMessage()));
+                    .body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
 
@@ -36,10 +34,10 @@ public class CertificatedController {
     public ResponseEntity<?> getCertificateByDni(@PathVariable String dni) {
         try {
             Certificated certificated = certificatedService.findCertificateByIntern(dni);
-            return ResponseEntity.ok(successResponse("Certificado encontrado", certificated));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Certificado encontrado", certificated));
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(errorResponse(ex.getMessage()));
+                    .body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
 
@@ -47,24 +45,11 @@ public class CertificatedController {
     public ResponseEntity<?> getAllCertificates(@PageableDefault(size = 10, page = 0) Pageable pageable) {
         try {
             Page<Certificated> certificates = certificatedService.findAllCertificates(pageable);
-            return ResponseEntity.ok(successResponse("Certificados obtenidos con éxito", certificates));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Certificados obtenidos con éxito", certificates));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(errorResponse("Error al obtener certificados"));
+                    .body(ResponseUtils.errorResponse("Error al obtener certificados"));
         }
-    }
-
-    private Map<String, Object> successResponse(String message, Object data) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", message);
-        response.put("data", data);
-        return response;
-    }
-
-    private Map<String, String> errorResponse(String message) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", message);
-        return response;
     }
 
 }

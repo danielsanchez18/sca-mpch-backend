@@ -2,6 +2,7 @@ package com.mpch.controlDeAsistencias_backend.controller;
 
 import com.mpch.controlDeAsistencias_backend.model.Supervisor;
 import com.mpch.controlDeAsistencias_backend.services.SupervisorService;
+import com.mpch.controlDeAsistencias_backend.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,9 +10,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/supervisor")
@@ -25,9 +23,9 @@ public class SupervisorController {
         try {
             Supervisor createdSupervisor = supervisorService.saveSupervisor(supervisor);
             return ResponseEntity.status(HttpStatus.CREATED).
-                    body(successResponse("Supervisor creado exitosamente", createdSupervisor));
+                    body(ResponseUtils.successResponse("Supervisor creado exitosamente", createdSupervisor));
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse(ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
 
@@ -35,9 +33,9 @@ public class SupervisorController {
     public ResponseEntity<?> getSupervisorById(@PathVariable String idSupervisor) {
         try {
             Supervisor supervisor = supervisorService.getSupervisorById(idSupervisor);
-            return ResponseEntity.ok(successResponse("Supervisor encontrado", supervisor));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Supervisor encontrado", supervisor));
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse(ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
 
@@ -45,9 +43,9 @@ public class SupervisorController {
     public ResponseEntity<?> getAllSupervisors(@PageableDefault(size = 10, page = 0) Pageable pageable) {
         try {
             Page<Supervisor> supervisors = supervisorService.getAllSupervisors(pageable);
-            return ResponseEntity.ok(successResponse("Lista de supervisores obtenida exitosamente", supervisors));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Lista de supervisores obtenida exitosamente", supervisors));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al obtener la lista de supervisores"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al obtener la lista de supervisores"));
         }
     }
 
@@ -55,9 +53,9 @@ public class SupervisorController {
     public ResponseEntity<?> searchSupervisorsByName(@PathVariable String name, @PageableDefault(size = 10, page = 0) Pageable pageable) {
         try {
             Page<Supervisor> supervisors = supervisorService.searchSupervisorsByName(name, pageable);
-            return ResponseEntity.ok(successResponse("Supervisores encontrados", supervisors));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Supervisores encontrados", supervisors));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar los supervisores"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al buscar los supervisores"));
         }
     }
 
@@ -65,9 +63,9 @@ public class SupervisorController {
     public ResponseEntity<?> searchSupervisorsByDni(@PathVariable String dni, @PageableDefault(size = 10, page = 0) Pageable pageable) {
         try {
             Page<Supervisor> supervisors = supervisorService.getSupervisorsByDni(dni, pageable);
-            return ResponseEntity.ok(successResponse("Supervisores encontrados", supervisors));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Supervisores encontrados", supervisors));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar los supervisores"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al buscar los supervisores"));
         }
     }
 
@@ -75,9 +73,9 @@ public class SupervisorController {
     public ResponseEntity<?> searchSupervisorsByArea(@PathVariable String area, @PageableDefault(size = 10, page = 0) Pageable pageable) {
         try {
             Page<Supervisor> supervisors = supervisorService.getSupervisorsByArea(area, pageable);
-            return ResponseEntity.ok(successResponse("Supervisores encontrados", supervisors));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Supervisores encontrados", supervisors));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar los supervisores"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al buscar los supervisores"));
         }
     }
 
@@ -90,9 +88,9 @@ public class SupervisorController {
     public ResponseEntity<?> updateSupervisor(@PathVariable String idSupervisor, @RequestBody Supervisor supervisor) {
         try {
             Supervisor updatedSupervisor = supervisorService.updateSupervisor(idSupervisor, supervisor);
-            return ResponseEntity.ok(successResponse("Supervisor actualizado exitosamente", updatedSupervisor));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Supervisor actualizado exitosamente", updatedSupervisor));
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse(ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
 
@@ -100,23 +98,10 @@ public class SupervisorController {
     public ResponseEntity<?> deleteSupervisor(@PathVariable String idSupervisor) {
         try {
             supervisorService.deleteSupervisor(idSupervisor);
-            return ResponseEntity.ok(successResponse("Supervisor eliminado exitosamente", null));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Supervisor eliminado exitosamente", null));
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse(ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseUtils.errorResponse(ex.getMessage()));
         }
-    }
-
-    private Map<String, Object> successResponse(String message, Object data) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", message);
-        response.put("data", data);
-        return response;
-    }
-
-    private Map<String, String> errorResponse(String message) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", message);
-        return response;
     }
 
 }

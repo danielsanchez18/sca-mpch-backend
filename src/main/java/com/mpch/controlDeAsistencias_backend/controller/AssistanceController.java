@@ -2,6 +2,7 @@ package com.mpch.controlDeAsistencias_backend.controller;
 
 import com.mpch.controlDeAsistencias_backend.model.Assistance;
 import com.mpch.controlDeAsistencias_backend.services.AssistanceService;
+import com.mpch.controlDeAsistencias_backend.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/assistance")
@@ -26,10 +25,10 @@ public class AssistanceController {
         try {
             Assistance assistance = assistanceService.registerCheckIn(dni);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(successResponse("Check-In registrado con éxito", assistance));
+                    .body(ResponseUtils.successResponse("Check-In registrado con éxito", assistance));
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(errorResponse(ex.getMessage()));
+                    .body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
 
@@ -38,10 +37,10 @@ public class AssistanceController {
         try {
             Assistance assistance = assistanceService.registerCheckOut(dni);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(successResponse("Check-Out registrado con éxito", assistance));
+                    .body(ResponseUtils.successResponse("Check-Out registrado con éxito", assistance));
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(errorResponse(ex.getMessage()));
+                    .body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
 
@@ -52,10 +51,10 @@ public class AssistanceController {
     ) {
         try {
             Page<Assistance> assistances = assistanceService.getAssistancesByDate(date, pageable);
-            return ResponseEntity.ok(successResponse("Asistencias obtenidas con éxito", assistances));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Asistencias obtenidas con éxito", assistances));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(errorResponse("Error al obtener asistencias por fecha"));
+                    .body(ResponseUtils.errorResponse("Error al obtener asistencias por fecha"));
         }
     }
 
@@ -66,10 +65,10 @@ public class AssistanceController {
     ) {
         try {
             Page<Assistance> assistances = assistanceService.searchAssistancesByInternName(name, pageable);
-            return ResponseEntity.ok(successResponse("Asistencias obtenidas con éxito", assistances));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Asistencias obtenidas con éxito", assistances));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(errorResponse("Error al buscar asistencias por nombre del practicante"));
+                    .body(ResponseUtils.errorResponse("Error al buscar asistencias por nombre del practicante"));
         }
     }
 
@@ -80,10 +79,10 @@ public class AssistanceController {
     ) {
         try {
             Page<Assistance> assistances = assistanceService.findAssistancesByArea(areaName, pageable);
-            return ResponseEntity.ok(successResponse("Asistencias obtenidas por área con éxito", assistances));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Asistencias obtenidas por área con éxito", assistances));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(errorResponse("Error al buscar asistencias por área"));
+                    .body(ResponseUtils.errorResponse("Error al buscar asistencias por área"));
         }
     }
 
@@ -94,10 +93,10 @@ public class AssistanceController {
     ) {
         try {
             double hours = assistanceService.getHoursWorkedByInternOnDate(dni, date);
-            return ResponseEntity.ok(successResponse("Horas trabajadas obtenidas con éxito", hours));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Horas trabajadas obtenidas con éxito", hours));
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(errorResponse(ex.getMessage()));
+                    .body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
 
@@ -107,10 +106,10 @@ public class AssistanceController {
                                                          @RequestParam int year) {
         try {
             double hours = assistanceService.getMonthlyHoursWorkedByArea(areaName, month, year);
-            return ResponseEntity.ok(successResponse("Horas mensuales trabajadas por área obtenidas con éxito", hours));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Horas mensuales trabajadas por área obtenidas con éxito", hours));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(errorResponse("Error al obtener horas trabajadas por área"));
+                    .body(ResponseUtils.errorResponse("Error al obtener horas trabajadas por área"));
         }
     }
 
@@ -120,24 +119,11 @@ public class AssistanceController {
                                                                @RequestParam int year) {
         try {
             double hours = assistanceService.getMonthlyHoursWorkedByUniversity(universityName, month, year);
-            return ResponseEntity.ok(successResponse("Horas mensuales trabajadas por universidad obtenidas con éxito", hours));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Horas mensuales trabajadas por universidad obtenidas con éxito", hours));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(errorResponse("Error al obtener horas trabajadas por universidad"));
+                    .body(ResponseUtils.errorResponse("Error al obtener horas trabajadas por universidad"));
         }
-    }
-
-    private Map<String, Object> successResponse(String message, Object data) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", message);
-        response.put("data", data);
-        return response;
-    }
-
-    private Map<String, String> errorResponse(String message) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", message);
-        return response;
     }
 
 }

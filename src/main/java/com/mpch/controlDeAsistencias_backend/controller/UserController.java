@@ -2,6 +2,7 @@ package com.mpch.controlDeAsistencias_backend.controller;
 
 import com.mpch.controlDeAsistencias_backend.model.User;
 import com.mpch.controlDeAsistencias_backend.services.UserService;
+import com.mpch.controlDeAsistencias_backend.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,8 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -25,9 +24,9 @@ public class UserController {
     public ResponseEntity<?> addUser(@RequestBody User user) {
         try {
             User createdUser = userService.save(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body(successResponse("Usuario creado exitosamente", createdUser));
+            return ResponseEntity.status(HttpStatus.CREATED).body(ResponseUtils.successResponse("Usuario creado exitosamente", createdUser));
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse(ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
 
@@ -35,9 +34,9 @@ public class UserController {
     public ResponseEntity<?> getUserById(@PathVariable UUID idUser) {
         try {
             User user = userService.findUserById(idUser);
-            return ResponseEntity.ok(successResponse("Usuario encontrado", user));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Usuario encontrado", user));
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse(ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
 
@@ -47,9 +46,9 @@ public class UserController {
     ) {
         try {
             Page<User> users = userService.findAllUsers(pageable);
-            return ResponseEntity.ok(successResponse("Usuarios obtenidos", users));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Usuarios obtenidos", users));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al obtener usuarios"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al obtener usuarios"));
         }
     }
 
@@ -60,9 +59,9 @@ public class UserController {
     ) {
         try {
             Page<User> users = userService.searchUsersByName(name, pageable);
-            return ResponseEntity.ok(successResponse("Búsqueda exitosa", users));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Búsqueda exitosa", users));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar usuarios"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al buscar usuarios"));
         }
     }
 
@@ -73,9 +72,9 @@ public class UserController {
     ) {
         try {
             Page<User> users = userService.findUsersByRole(idRole, pageable);
-            return ResponseEntity.ok(successResponse("Usuarios por rol obtenidos", users));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Usuarios por rol obtenidos", users));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar usuarios por rol"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al buscar usuarios por rol"));
         }
     }
 
@@ -86,9 +85,9 @@ public class UserController {
     ) {
         try {
             Page<User> users = userService.searchUsersByDni(dni, pageable);
-            return ResponseEntity.ok(successResponse("Usuarios por dni obtenidos", users));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Usuarios por dni obtenidos", users));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar usuarios"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al buscar usuarios"));
         }
     }
 
@@ -99,9 +98,9 @@ public class UserController {
     ) {
         try {
             Page<User> users = userService.findUsersByStatus(status, pageable);
-            return ResponseEntity.ok(successResponse("Usuarios por estado obtenidos", users));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Usuarios por estado obtenidos", users));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar usuarios por estado"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al buscar usuarios por estado"));
         }
     }
 
@@ -117,9 +116,9 @@ public class UserController {
     ) {
         try {
             User updatedUser = userService.updateUser(idUser, user);
-            return ResponseEntity.ok(successResponse("Usuario actualizado", updatedUser));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Usuario actualizado", updatedUser));
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse(ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
 
@@ -127,22 +126,10 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable UUID idUser) {
         try {
             userService.deleteUser(idUser);
-            return ResponseEntity.ok(successResponse("Usuario eliminado", null));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Usuario eliminado", null));
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse(ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
 
-    private Map<String, Object> successResponse(String message, Object data) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", message);
-        response.put("data", data);
-        return response;
-    }
-
-    private Map<String, String> errorResponse(String message) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", message);
-        return response;
-    }
 }

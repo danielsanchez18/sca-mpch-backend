@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface SupervisorRepository extends JpaRepository<Supervisor, String> {
 
     boolean existsByArea_IdArea(Long idArea);
@@ -20,5 +22,7 @@ public interface SupervisorRepository extends JpaRepository<Supervisor, String> 
     Page<Supervisor> findByUser_DniContainingIgnoreCase(String dni, Pageable pageable);
 
     Page<Supervisor> findByArea_NameContainingIgnoreCase(String area, Pageable pageable);
+
+    Optional<Supervisor> findByUser_Dni(String dni);
 
 }

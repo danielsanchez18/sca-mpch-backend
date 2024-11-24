@@ -2,6 +2,7 @@ package com.mpch.controlDeAsistencias_backend.controller;
 
 import com.mpch.controlDeAsistencias_backend.model.Area;
 import com.mpch.controlDeAsistencias_backend.services.AreaService;
+import com.mpch.controlDeAsistencias_backend.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,8 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/area")
@@ -25,13 +24,13 @@ public class AreaController {
         try {
             Area createdArea = areaService.addArea(area);
             return ResponseEntity.status(HttpStatus.CREATED).
-                    body(successResponse("Área creada exitosamente", createdArea));
+                    body(ResponseUtils.successResponse("Área creada exitosamente", createdArea));
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).
-                    body(errorResponse(ex.getMessage()));
+                    body(ResponseUtils.errorResponse(ex.getMessage()));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
-                    body(errorResponse("Error al crear el área"));
+                    body(ResponseUtils.errorResponse("Error al crear el área"));
         }
     }
 
@@ -39,9 +38,9 @@ public class AreaController {
     public ResponseEntity<?> getAreaById(@PathVariable Long id) {
         try {
             Area area = areaService.getAreaById(id);
-            return ResponseEntity.ok(successResponse("Área encontrada", area));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Área encontrada", area));
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse(ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
 
@@ -49,9 +48,9 @@ public class AreaController {
     public ResponseEntity<?> getAllAreas(@PageableDefault(size = 10, page = 0) Pageable pageable) {
         try {
             Page<Area> areas = areaService.getAllAreas(pageable);
-            return ResponseEntity.ok(successResponse("Áreas obtenidas exitosamente", areas));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Áreas obtenidas exitosamente", areas));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al obtener las áreas"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al obtener las áreas"));
         }
     }
 
@@ -59,9 +58,9 @@ public class AreaController {
     public ResponseEntity<?> searchAreaByName(@PathVariable String name, @PageableDefault(size = 10, page = 0) Pageable pageable) {
         try {
             Page<Area> areas = areaService.searchAreaByName(name, pageable);
-            return ResponseEntity.ok(successResponse("Resultados de búsqueda obtenidos", areas));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Resultados de búsqueda obtenidos", areas));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al buscar las áreas"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al buscar las áreas"));
         }
     }
 
@@ -74,11 +73,11 @@ public class AreaController {
     public ResponseEntity<?> updateArea(@PathVariable Long id, @RequestBody Area area) {
         try {
             Area updatedArea = areaService.updateArea(id, area);
-            return ResponseEntity.ok(successResponse("Área actualizada exitosamente", updatedArea));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Área actualizada exitosamente", updatedArea));
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse(ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseUtils.errorResponse(ex.getMessage()));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al actualizar el área"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al actualizar el área"));
         }
     }
 
@@ -86,27 +85,12 @@ public class AreaController {
     public ResponseEntity<?> deleteArea(@PathVariable Long id) {
         try {
             areaService.deleteArea(id);
-            return ResponseEntity.ok(successResponse("Área eliminada exitosamente", null));
+            return ResponseEntity.ok(ResponseUtils.successResponse("Área eliminada exitosamente", null));
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse(ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseUtils.errorResponse(ex.getMessage()));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse("Error al eliminar el área"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.errorResponse("Error al eliminar el área"));
         }
-    }
-
-    // Respuesta de éxito
-    private Map<String, Object> successResponse(String message, Object data) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", message);
-        response.put("data", data);
-        return response;
-    }
-
-    // Respuesta de error
-    private Map<String, String> errorResponse(String message) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", message);
-        return response;
     }
 
 }

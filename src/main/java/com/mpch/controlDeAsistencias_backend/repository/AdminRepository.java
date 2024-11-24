@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 public interface AdminRepository extends JpaRepository<Admin, String> {
 
     // Page<Admin> findByUser_NameContainingIgnoreCaseOrUser_LastnameContainingIgnoreCase(String name, Pageable pageable);
@@ -19,4 +21,7 @@ public interface AdminRepository extends JpaRepository<Admin, String> {
     Page<Admin> findByFullName(@Param("fullName") String fullName, Pageable pageable);
 
     Page<Admin> findByUser_DniContainingIgnoreCase(String dni, Pageable pageable);
+
+    Optional<Admin> findByUser_Dni(String dni);
+
 }
