@@ -175,5 +175,3 @@ Este proyecto es un sistema de **Control de Asistencias** diseñado para gestion
 - **BCrypt para encriptación de contraseñas**
 
 ---
-
-¿Quieres que agregue algo más, como ejemplos detallados de solicitudes o datos de prueba?
