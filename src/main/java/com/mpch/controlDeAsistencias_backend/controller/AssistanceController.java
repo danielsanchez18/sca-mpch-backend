@@ -60,6 +60,21 @@ public class AssistanceController {
         }
     }
 
+    @GetMapping("/date-range")
+    public ResponseEntity<?> getAssistancesByDateRange(
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate,
+            @PageableDefault(size = 10, page = 0) Pageable pageable
+    ) {
+        try {
+            Page<Assistance> assistances = assistanceService.getAssistancesByDateRange(startDate, endDate, pageable);
+            return ResponseEntity.ok(ResponseUtils.successResponse("Asistencias obtenidas con éxito", assistances));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ResponseUtils.errorResponse("Error al obtener asistencias por rango de fechas"));
+        }
+    }
+
     @GetMapping("/intern-name")
     public ResponseEntity<?> searchAssistancesByInternName(
             @RequestParam String name,

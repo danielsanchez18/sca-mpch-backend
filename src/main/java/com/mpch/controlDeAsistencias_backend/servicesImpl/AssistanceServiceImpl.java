@@ -80,6 +80,13 @@ public class AssistanceServiceImpl implements AssistanceService {
     }
 
     @Override
+    public Page<Assistance> getAssistancesByDateRange(LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        LocalDateTime startOfRange = startDate.atStartOfDay();
+        LocalDateTime endOfRange = endDate.atTime(LocalTime.MAX);
+        return assistanceRepository.findAllByCheckInBetween(startOfRange, endOfRange, pageable);
+    }
+
+    @Override
     public Page<Assistance> searchAssistancesByInternName(String name, Pageable pageable) {
         return assistanceRepository.findByInternFullName(name, pageable);
     }

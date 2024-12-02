@@ -16,6 +16,8 @@ public interface AssistanceService {
 
     Page<Assistance> getAssistancesByDate(LocalDate date, Pageable pageable);
 
+    Page<Assistance> getAssistancesByDateRange(LocalDate startDate, LocalDate endDate, Pageable pageable);
+
     Page<Assistance> searchAssistancesByInternName(String name, Pageable pageable);
 
     Page<Assistance> findAssistancesByArea(String areaName, Pageable pageable);
