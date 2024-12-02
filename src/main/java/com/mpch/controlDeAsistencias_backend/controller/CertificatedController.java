@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/certificated")
+@CrossOrigin(origins = "http://localhost:4200")
+//@CrossOrigin("*")
 public class CertificatedController {
 
     @Autowired

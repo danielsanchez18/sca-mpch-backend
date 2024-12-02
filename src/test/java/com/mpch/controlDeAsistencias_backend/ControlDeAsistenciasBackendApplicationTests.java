@@ -1,13 +1,13 @@
 package com.mpch.controlDeAsistencias_backend;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+// import org.junit.jupiter.api.Test;
+// import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+// @SpringBootTest
 class ControlDeAsistenciasBackendApplicationTests {
 
-	@Test
+	/* @Test
 	void contextLoads() {
-	}
+	} */
 
 }

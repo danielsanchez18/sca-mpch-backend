@@ -22,6 +22,7 @@ public class SecurityConfig {
             "/user/*/*",
             "/admin/*/*",
             "/supervisor/*/*",
+            "/**"
     };
 
     @Bean
@@ -32,6 +33,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtUtils jwtUtils) throws Exception {
         http.csrf().disable()
+//                .cors()
+//                .disable()
                 .authorizeRequests()
                 .requestMatchers(AUTH_WHITELIST).permitAll()
                 .anyRequest().authenticated()

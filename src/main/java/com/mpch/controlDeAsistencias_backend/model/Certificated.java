@@ -9,7 +9,7 @@ import java.util.UUID;
 @Table(name = "certificated")
 public class Certificated {
 
-    @Id
+    @Id 
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_certificated")
     private UUID idCertificated;
