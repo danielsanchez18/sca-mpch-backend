@@ -1,6 +1,7 @@
 package com.mpch.controlDeAsistencias_backend.controller;
 
 import com.mpch.controlDeAsistencias_backend.model.Certificated;
+import com.mpch.controlDeAsistencias_backend.model.Intern;
 import com.mpch.controlDeAsistencias_backend.services.CertificatedService;
 import com.mpch.controlDeAsistencias_backend.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,17 @@ public class CertificatedController {
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ResponseUtils.errorResponse("Error al obtener certificados"));
+        }
+    }
+
+    @GetMapping("/eligible")
+    public ResponseEntity<?> getEligibleInterns(@PageableDefault(size = 10, page = 0) Pageable pageable) {
+        try {
+            Page<Intern> eligibleInterns = certificatedService.findEligibleInternsForCertification(pageable);
+            return ResponseEntity.ok(ResponseUtils.successResponse("Practicantes elegibles obtenidos con éxito", eligibleInterns));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ResponseUtils.errorResponse("Error al obtener practicantes elegibles"));
         }
     }
 

@@ -71,4 +71,9 @@ public class CertificatedServiceImpl implements CertificatedService {
     public Page<Certificated> findCertifiedInterns(Pageable pageable) {
         return certificatedRepository.findByStatus(true, pageable);
     }
+
+    @Override
+    public Page<Intern> findEligibleInternsForCertification(Pageable pageable) {
+        return internRepository.findEligibleInterns(pageable); // Implementar en el repositorio
+    }
 }

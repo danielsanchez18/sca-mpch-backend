@@ -35,4 +35,8 @@ public interface InternRepository extends JpaRepository<Intern, String> {
 
     Optional<Intern> findByUser_Dni(String dni);
 
+    @Query("SELECT i FROM Intern i " +
+            "WHERE i.totalHours >= i.areaUniversity.hoursCertified")
+    Page<Intern> findEligibleInterns(Pageable pageable);
+
 }

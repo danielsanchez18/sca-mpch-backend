@@ -59,7 +59,8 @@ public class InternServiceImpl implements InternService {
         });
 
         intern.getUser().setRole(internRole);
-        intern.setTotalHours(0L);
+        // intern.setTotalHours(0L);
+        // System.out.println("Total Hours: " + intern.getTotalHours());
 
         if (intern.getUser().getIdUser() == null) {
             User savedUser = userService.save(intern.getUser());

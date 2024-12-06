@@ -25,6 +25,7 @@ public class InternController {
     @PostMapping("/add")
     public ResponseEntity<?> addIntern(@RequestBody Intern intern) {
         try {
+            // System.out.println("Total Hours: " + intern.getTotalHours());
             Intern createdIntern = internService.saveIntern(intern);
             return ResponseEntity.status(HttpStatus.CREATED).
                     body(ResponseUtils.successResponse("Practicante creado exitosamente", createdIntern));
