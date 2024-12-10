@@ -31,7 +31,7 @@ public class AdminController {
                     body(ResponseUtils.errorResponse(ex.getMessage()));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
-                    body(ResponseUtils.errorResponse("Error al crear el área"));
+                    body(ResponseUtils.errorResponse("Error al crear el administrador"));
         }
     }
 

@@ -29,4 +29,6 @@ public interface InternService {
 
     void deleteIntern(String idIntern);
 
+    // void deleteIntern(UUID idIntern);
+
 }

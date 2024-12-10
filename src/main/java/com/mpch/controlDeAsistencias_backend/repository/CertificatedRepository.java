@@ -22,4 +22,6 @@ public interface CertificatedRepository extends JpaRepository<Certificated, UUID
 
     Page<Certificated> findByStatus(boolean status, Pageable pageable);
 
+    void deleteAllByIntern_IdIntern(String idIntern);
+
 }

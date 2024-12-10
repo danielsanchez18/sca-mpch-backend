@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class AdminServiceImpl implements AdminService {
 
@@ -101,7 +103,13 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public void deleteAdmin(String idAdmin) {
         validateSingleAdmin();
+
+        Optional<Admin> adminOpt = adminRepository.findById(idAdmin);
+        if (adminOpt.isEmpty()) {
+            throw new RuntimeException("Administrador no encontrado");
+        }
+        Admin admin = adminOpt.get();
         adminRepository.deleteById(idAdmin);
-        userService.deleteUser(adminRepository.findById(idAdmin).get().getUser().getIdUser());
+        userService.deleteUser(admin.getUser().getIdUser());
     }
 }

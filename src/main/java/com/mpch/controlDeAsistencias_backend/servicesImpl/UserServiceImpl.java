@@ -3,6 +3,7 @@ package com.mpch.controlDeAsistencias_backend.servicesImpl;
 import com.mpch.controlDeAsistencias_backend.model.User;
 import com.mpch.controlDeAsistencias_backend.repository.UserRepository;
 import com.mpch.controlDeAsistencias_backend.services.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

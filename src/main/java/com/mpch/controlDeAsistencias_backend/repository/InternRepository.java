@@ -39,4 +39,6 @@ public interface InternRepository extends JpaRepository<Intern, String> {
             "WHERE i.totalHours >= i.areaUniversity.hoursCertified")
     Page<Intern> findEligibleInterns(Pageable pageable);
 
+    void deleteByUser_IdUser(UUID idUser);
+
 }

@@ -1,5 +1,6 @@
 package com.mpch.controlDeAsistencias_backend.servicesImpl;
 
+import com.mpch.controlDeAsistencias_backend.model.Intern;
 import com.mpch.controlDeAsistencias_backend.model.Role;
 import com.mpch.controlDeAsistencias_backend.model.Supervisor;
 import com.mpch.controlDeAsistencias_backend.model.User;
@@ -109,7 +110,12 @@ public class SupervisorServiceImpl implements SupervisorService {
 
     @Override
     public void deleteSupervisor(String idSupervisor) {
+
+        Supervisor supervisor = supervisorRepository.findById(idSupervisor).orElseThrow(
+                () -> new RuntimeException("No se encontró el supervisor.")
+        );
+
         supervisorRepository.deleteById(idSupervisor);
-        userService.deleteUser(supervisorRepository.findById(idSupervisor).get().getUser().getIdUser());
+        userService.deleteUser(supervisor.getUser().getIdUser());
     }
 }

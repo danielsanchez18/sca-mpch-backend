@@ -5,9 +5,13 @@ import com.mpch.controlDeAsistencias_backend.model.Intern;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.UUID;
+
 public interface CertificatedService {
 
     Certificated generateCertificated(String dni);
+
+    Certificated findById(UUID id);
 
     Certificated findCertificateByIntern(String dni);
 

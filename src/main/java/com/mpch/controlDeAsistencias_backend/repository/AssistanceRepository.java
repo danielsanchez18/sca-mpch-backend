@@ -52,4 +52,6 @@ public interface AssistanceRepository extends JpaRepository<Assistance, UUID> {
 
     @Query("SELECT COALESCE(SUM(a.hoursWorked), 0) FROM Assistance a WHERE a.intern.idIntern = :idIntern")
     double getTotalHoursWorkedByIntern(@Param("idIntern") String idIntern);
+
+    void deleteAllByIntern_IdIntern(String idIntern);
 }

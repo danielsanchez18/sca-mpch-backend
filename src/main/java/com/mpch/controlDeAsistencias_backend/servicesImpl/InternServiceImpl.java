@@ -1,15 +1,10 @@
 package com.mpch.controlDeAsistencias_backend.servicesImpl;
 
-import com.mpch.controlDeAsistencias_backend.model.AreaUniversity;
-import com.mpch.controlDeAsistencias_backend.model.Intern;
-import com.mpch.controlDeAsistencias_backend.model.Role;
-import com.mpch.controlDeAsistencias_backend.model.User;
-import com.mpch.controlDeAsistencias_backend.repository.AreaUniversityRepository;
-import com.mpch.controlDeAsistencias_backend.repository.AssistanceRepository;
-import com.mpch.controlDeAsistencias_backend.repository.InternRepository;
-import com.mpch.controlDeAsistencias_backend.repository.RoleRepository;
+import com.mpch.controlDeAsistencias_backend.model.*;
+import com.mpch.controlDeAsistencias_backend.repository.*;
 import com.mpch.controlDeAsistencias_backend.services.InternService;
 import com.mpch.controlDeAsistencias_backend.services.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +26,9 @@ public class InternServiceImpl implements InternService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private CertificatedRepository certificatedRepository;
 
     @Autowired
     private RoleRepository roleRepository;
@@ -128,15 +126,20 @@ public class InternServiceImpl implements InternService {
     }
 
     @Override
+    @Transactional
     public void deleteIntern(String idIntern) {
 
         Intern intern = internRepository.findById(idIntern).orElseThrow(
                 () -> new RuntimeException("No se encontró el practicante.")
         );
 
-        assistanceRepository.deleteById(intern.getUser().getIdUser());
+        assistanceRepository.deleteAllByIntern_IdIntern(idIntern);
+
+        certificatedRepository.deleteAllByIntern_IdIntern(idIntern);
 
         internRepository.deleteById(idIntern);
+
         userService.deleteUser(intern.getUser().getIdUser());
     }
+
 }

@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class CertificatedServiceImpl implements CertificatedService {
@@ -48,6 +49,13 @@ public class CertificatedServiceImpl implements CertificatedService {
         // TODO: Generar y guardar el PDF aquí (ver siguiente sección)
 
         return certificatedRepository.save(certificated);
+    }
+
+    @Override
+    public Certificated findById(UUID id) {
+        return certificatedRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("No se encontró un certificado con ID: " + id)
+        );
     }
 
     @Override

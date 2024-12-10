@@ -2,6 +2,7 @@ package com.mpch.controlDeAsistencias_backend.servicesImpl;
 
 import com.mpch.controlDeAsistencias_backend.model.User;
 import com.mpch.controlDeAsistencias_backend.repository.AdminRepository;
+import com.mpch.controlDeAsistencias_backend.repository.SecurityRepository;
 import com.mpch.controlDeAsistencias_backend.repository.SupervisorRepository;
 import com.mpch.controlDeAsistencias_backend.services.AuthService;
 import com.mpch.controlDeAsistencias_backend.utils.JwtUtils;
@@ -17,6 +18,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private SupervisorRepository supervisorRepository;
+
+    @Autowired
+    private SecurityRepository securityRepository;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -36,6 +40,12 @@ public class AuthServiceImpl implements AuthService {
             return jwtUtils.generateToken(dni, "Supervisor");
         }
 
+        // Buscar Seguridad
+        var security = securityRepository.findByUser_Dni(dni);
+        if (security.isPresent() && passwordMatches(password, security.get().getPassword())) {
+            return jwtUtils.generateToken(dni, "Seguridad");
+        }
+
         throw new RuntimeException("Credenciales inválidas");
 
     }
@@ -51,6 +61,7 @@ public class AuthServiceImpl implements AuthService {
         return adminRepository.findByUser_Dni(dni)
                 .map(admin -> admin.getUser())
                 .or(() -> supervisorRepository.findByUser_Dni(dni).map(supervisor -> supervisor.getUser()))
+                .or(() -> securityRepository.findByUser_Dni(dni).map(security -> security.getUser()))
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
 }

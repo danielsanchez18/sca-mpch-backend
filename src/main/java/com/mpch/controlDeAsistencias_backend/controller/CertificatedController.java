@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/certificated")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -29,6 +31,17 @@ public class CertificatedController {
                     .body(ResponseUtils.successResponse("Certificado generado con éxito", certificated));
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ResponseUtils.errorResponse(ex.getMessage()));
+        }
+    }
+
+    @GetMapping("/id/{id}")
+    public ResponseEntity<?> getCertificateById(@PathVariable UUID id) {
+        try {
+            Certificated certificated = certificatedService.findById(id);
+            return ResponseEntity.ok(ResponseUtils.successResponse("Certificado encontrado", certificated));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ResponseUtils.errorResponse(ex.getMessage()));
         }
     }
@@ -65,5 +78,7 @@ public class CertificatedController {
                     .body(ResponseUtils.errorResponse("Error al obtener practicantes elegibles"));
         }
     }
+
+
 
 }
