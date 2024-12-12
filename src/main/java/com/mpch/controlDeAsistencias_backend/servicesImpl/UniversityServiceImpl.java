@@ -71,9 +71,16 @@ public class UniversityServiceImpl implements UniversityService {
     @Override
     public University updateUniversity(Long idUniversity, University university) {
         validateExisting(idUniversity);
-        validateUniqueName(university.getName());
 
+        // Obtener la universidad actual para comparar su nombre
         University existingUniversity = universityRepository.findById(idUniversity).orElseThrow();
+
+        // Validar que el nombre no esté siendo usado por otra universidad, pero no por la misma universidad
+        if (!existingUniversity.getName().equals(university.getName()) && universityRepository.existsByName(university.getName())) {
+            throw new RuntimeException("La universidad con el nombre '" + university.getName() + "' ya existe.");
+        }
+
+        // Actualizar la universidad
         existingUniversity.setName(university.getName());
         existingUniversity.setAcronym(university.getAcronym());
         existingUniversity.setPhoto(university.getPhoto());
